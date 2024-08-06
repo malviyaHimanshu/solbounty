@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "solbounty",
+  "version": "1.0",
+  "description": "bounties made simpler with solana",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["bundle.js"],
+      "matches": ["https://github.com/*"]
+    }
+  ]
+}
