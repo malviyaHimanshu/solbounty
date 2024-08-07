@@ -1,5 +1,5 @@
 import React from "react"
-import SolanaLogo from "./SolanaLogo"
+import SolanaLogo from "./img/SolanaLogo"
 
 export default function BountyButton() {
 
@@ -11,7 +11,8 @@ export default function BountyButton() {
   return (
     <button
       id="bounty-button"
-      className="btn btn-primary flex items-center gap-2"
+      className="btn btn-primary"
+      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
       onClick={handleOnClick}
     >
       <SolanaLogo height="14" />
