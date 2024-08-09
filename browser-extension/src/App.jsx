@@ -92,23 +92,28 @@ function addBountyLabelonIssuePage() {
 }
 
 function addClaimBountyOnPR() {
-  // add claim bounty button while raising pr
-  const prContainer = document.querySelector('.js-slash-command-surface');
-  if(prContainer) {
-    const createPRSection = prContainer.lastElementChild.lastElementChild;
-    console.log('createPRSection', createPRSection);
+  // check if the current page includes 'compare' in route
+  const prPagePattern = /\/compare\//;
+  const match = window.location.pathname.match(prPagePattern);
+  if (match) {
+    // add claim bounty button while raising pr
+    const prContainer = document.querySelector('.js-slash-command-surface');
+    if (prContainer) {
+      const createPRSection = prContainer.lastElementChild.lastElementChild;
+      console.log('createPRSection', createPRSection);
 
-    if(createPRSection && !document.querySelector('#claim-bounty-button')) {
-      const claimBountyButtonContainer = document.createElement('div');
-      claimBountyButtonContainer.id = 'claim-bounty-button';
-      createPRSection.style.display = 'flex';
-      createPRSection.style.alignItems = 'center';
-      createPRSection.insertBefore(claimBountyButtonContainer, createPRSection.firstChild);
+      if (createPRSection && !document.querySelector('#claim-bounty-button')) {
+        const claimBountyButtonContainer = document.createElement('div');
+        claimBountyButtonContainer.id = 'claim-bounty-button';
+        createPRSection.style.display = 'flex';
+        createPRSection.style.alignItems = 'center';
+        createPRSection.insertBefore(claimBountyButtonContainer, createPRSection.firstChild);
 
-      ReactDOM.render(
-        <ClaimBountyButton />,
-        claimBountyButtonContainer
-      )
+        ReactDOM.render(
+          <ClaimBountyButton />,
+          claimBountyButtonContainer
+        )
+      }
     }
   }
 }
