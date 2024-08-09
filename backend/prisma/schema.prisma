@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    Int       @id @default(autoincrement())
+  github_username       String    @unique
+  account_addr          String    @unique
+
+  bounties_won          Bounty[]  @relation("WonByUser")
+  bonties_created       Bounty[]  @relation("CreatedByUser")
+
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+}
+
+model Bounty {
+  id                    Int       @id @default(autoincrement())
+
+  issue_url             String    @unique
+  amount                Int
+  token                 String
+
+  created_by            User      @relation("CreatedByUser", fields: [created_by_id], references: [id])
+  created_by_id         Int
+
+  won_by                User?      @relation("WonByUser", fields: [won_by_id], references: [id])
+  won_by_id             Int?
+
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+}
