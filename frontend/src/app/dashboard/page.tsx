@@ -1,10 +1,6 @@
-import { cn } from "@/lib/utils";
-import { coromorantGaramond, instrumentSerif, ptSerif } from "@/lib/fonts";
+import { redirect } from "next/navigation";
 
 export default function Dashboard() {
-  return (
-    <div className="p-10">
-      <h1 className={cn("text-3xl text-zinc-600", coromorantGaramond.className)}>Welcome back, Himanshu</h1>
-    </div>
-  );
+  redirect('/dashboard/home');
+  return null;
 }

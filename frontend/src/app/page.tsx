@@ -2,7 +2,7 @@ import Button from "@/components/button";
 import SolanaLogo from "@/components/img/SolanaLogo";
 import Link from "next/link";
 
-export default function Home() {
+export default function LandingPage() {
   // TODO: complete landing page
   return (
     <main className="min-h-screen ">
@@ -24,7 +24,7 @@ export default function Home() {
             right from GitHub.
           </p>
           <Link href="/dashboard">
-            <Button color="green">{"try now ->"}</Button>
+            <Button color="green">{"try now →"}</Button>
           </Link>
         </div>
       </div>

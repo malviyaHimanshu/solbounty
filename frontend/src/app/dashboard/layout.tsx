@@ -1,4 +1,4 @@
-import Header from "@/components/header";
+import Header from "../../components/header";
 import { instrumentSerif, inter } from "@/lib/fonts";
 import Sidebar from "@/components/sidebar";
 
@@ -9,13 +9,13 @@ export default function DashboardLayout({
 }>) {
   return (
     <main className={inter.className + " max-h-screen min-h-screen h-screen"}>
-      <Header />
       <Sidebar />
+      <Header />
       <div>
         <div className="h-[70px]"></div>
         <div className="flex">
-          <div className="h-[100px] w-[350px]"></div>
-          <div className="h-[calc(100vh-70px)] w-[calc(100vw-350px)]">
+          <div className="h-[100px] w-[250px] lg:w-[350px]"></div>
+          <div className="p-10 h-[calc(100vh-70px)] w-[calc(100vw-250px)] lg:w-[calc(100vw-350px)]">
             {children}
           </div>
         </div>
