@@ -1,5 +1,8 @@
 import Button from "@/components/button";
+import ConnectWallet from "@/components/connect-wallet";
 import SolanaLogo from "@/components/img/SolanaLogo";
+import Login from "@/components/login";
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 
 export default function LandingPage() {
@@ -11,7 +14,12 @@ export default function LandingPage() {
           <SolanaLogo height="18" color="#18181B" />
           solbounty
         </h1>
-        <Button color="black">{"connect wallet"}</Button>
+        <Login>
+          <Button color="black" className="flex items-center gap-2">
+            <GitHubLogoIcon />
+            Login 
+          </Button>    
+        </Login>
       </header>
 
       <div className="flex flex-col px-10">

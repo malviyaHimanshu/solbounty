@@ -1,12 +1,24 @@
 import Header from "../../components/header";
 import { instrumentSerif, inter } from "@/lib/fonts";
 import Sidebar from "@/components/sidebar";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { useUser } from "@/contexts/user-context";
 
 export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookie = cookies().get('auth_token');
+  const user = verifyToken(cookie?.value);  
+  if(!user) {
+    redirect('/');
+  }
+
+  // TODO: set user data in context
+  
   return (
     <main className={inter.className + " max-h-screen min-h-screen h-screen"}>
       <Sidebar />

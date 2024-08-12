@@ -2,12 +2,18 @@ import { cn } from "@/lib/utils";
 import { coromorantGaramond, instrumentSerif, ptSerif } from "@/lib/fonts";
 import { FaceIcon, LightningBoltIcon, PlusCircledIcon } from "@radix-ui/react-icons";
 import { Card } from '@nextui-org/react';
+// import { useUser } from "@/contexts/user-context";
+import { cookies } from "next/headers";
 
 export default function Home() {
+  // const { user } = useUser();
+
   return (
     <>
-      <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Welcome back, Himanshu</h1>
+      <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Welcome back, {}</h1>
       <p className="mt-2 text-zinc-500">create new bounties or explore all open bounties.</p>
+
+      
 
       {/* TODO: update ui for these cards */}
       <div className="grid grid-cols-1 gap-3 mt-6 sm:grid-cols-2 lg:grid-cols-3">
