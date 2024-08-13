@@ -1,25 +1,19 @@
 import Button from "@/components/button";
-import ConnectWallet from "@/components/connect-wallet";
 import SolanaLogo from "@/components/img/SolanaLogo";
-import Login from "@/components/login";
-import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import LoginWithGitHub from "@/components/login";
 import Link from "next/link";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+
   // TODO: complete landing page
   return (
     <main className="min-h-screen ">
-      <header className="flex items-center justify-between p-5 px-14">
+      <header className="flex items-center justify-between p-5 px-14 h-20">
         <h1 className="text-xl font-semibold tracking-tight flex items-center gap-2">
           <SolanaLogo height="18" color="#18181B" />
           solbounty
         </h1>
-        <Login>
-          <Button color="black" className="flex items-center gap-2">
-            <GitHubLogoIcon />
-            Login 
-          </Button>    
-        </Login>
+        <LoginWithGitHub />
       </header>
 
       <div className="flex flex-col px-10">

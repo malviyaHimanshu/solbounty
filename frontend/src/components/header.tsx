@@ -2,8 +2,11 @@
 import SolanaLogo from "./img/SolanaLogo";
 import DynamicBreadcrumbs from "./dynamic-breadcrumbs";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { Avatar } from "@nextui-org/react";
 
 export default function Header() {
+  const { data: session, status } = useSession();
 
   return (
     <header className="fixed left-0 top-0 right-0 z-10 text-zinc-500 w-full h-[70px] border-b border-white">
@@ -17,8 +20,9 @@ export default function Header() {
           </Link>
         </div>
 
-        <div className="p-5 px-10">
+        <div className="p-5 px-10 flex items-center justify-between w-[calc(100vw-250px)] lg:w-[calc(100vw-350px)]">
           <DynamicBreadcrumbs />
+          <Avatar name={`${session?.user?.name}`} src={`${session?.user?.image}`} size="sm" />
         </div>
       </div>
     </header>
