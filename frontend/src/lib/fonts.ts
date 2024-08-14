@@ -1,8 +1,14 @@
-import { Instrument_Serif, Inter, Cormorant_Garamond, PT_Serif } from "next/font/google";
+import { Instrument_Serif, Inter, Cormorant_Garamond, PT_Serif, Inter_Tight } from "next/font/google";
 
 export const inter = Inter({ 
   subsets: ['latin'], 
   display: 'swap',
+});
+
+export const interTight = Inter_Tight({
+  subsets: ['latin'],
+  display: 'swap',
+  style: ['normal', 'italic']
 });
 
 export const instrumentSerif = Instrument_Serif({

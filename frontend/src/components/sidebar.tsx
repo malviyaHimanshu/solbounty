@@ -2,7 +2,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { HomeOutlinedIcon, MedalOutlinedIcon, UserCircleOutlinedIcon } from "@/icons";
+import { HomeOutlinedIcon, MedalOutlinedIcon, PlusOutlinedIcon, UserCircleOutlinedIcon } from "@/icons";
 import { CurrencyIcon } from "@/icons/currency-icon";
 
 interface Menu {
@@ -18,6 +18,7 @@ export default function Sidebar() {
 
   const menu: Menu[] = [
     { label: 'Home', href: '/dashboard/home', icon: <HomeOutlinedIcon color="#71717a"  />, iconActive: <HomeOutlinedIcon color="#3f3f46" /> },
+    { label: 'Create bounty', href: '/dashboard/create-bounty', icon: <PlusOutlinedIcon color="#71717a" />, iconActive: <PlusOutlinedIcon color="#3f3f46" /> },
     { label: 'Solve bounties', href: '/dashboard/solve-bounties', icon: <MedalOutlinedIcon color="#71717a" />, iconActive: <MedalOutlinedIcon color="#3f3f46" /> },
     { label: 'Earnings', href: '/dashboard/earnings', icon: <CurrencyIcon color="#71717a" />, iconActive: <CurrencyIcon color="#3f3f46" /> },
     { label: 'Profile', href: '/dashboard/profile', icon: <UserCircleOutlinedIcon color="#71717a" />, iconActive: <UserCircleOutlinedIcon color="#3f3f46" /> },
