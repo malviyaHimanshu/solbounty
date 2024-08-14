@@ -23,3 +23,5 @@ export const screenSizes: screen_sizes = {
     sidebar_width: '350px',
   },
 }
+
+export const API_URL = process.env.NEXT_PUBLIC_API_URL as string;

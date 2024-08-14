@@ -12,7 +12,7 @@ export default function Home() {
 
   return (
     <>
-      <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Welcome back, {}</h1>
+      <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Welcome back, {session?.user?.name?.split(' ')[0]}</h1>
       <p className="mt-2 text-zinc-500">create new bounties or explore all open bounties.</p>
 
       {/* TODO: update ui for these cards */}

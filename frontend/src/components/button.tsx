@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 import React, { useState } from "react"
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  color?: "green" | "blue" | "black" | "white" | "red",
+  color?: "green" | "blue" | "black" | "white" | "red" | "purple",
   type?: "default" | "flat",
   className?: string,
   children: React.ReactNode
@@ -27,6 +27,7 @@ export default function Button({
         color === "red" && "from-red-400 to-red-600 text-white border-red-300",
         color === "black" && "from-zinc-600 to-zinc-800 text-white border-zinc-500",
         color === "white" && "from-zinc-100 to-zinc-300 text-black border-zinc-50",
+        color === "purple" && "from-purple-400 to-purple-600 text-white border-purple-300",
         className
       )} 
       onMouseDown={() => setIsPressed(true)}
