@@ -2,13 +2,36 @@
 import { Router } from "express";
 import prisma from "../config/prismaClient";
 import axios from "axios";
-import { authMiddleware } from "../middleware/authMiddleware";
+import { authMiddleware, gitAuthMiddleware } from "../middleware/authMiddleware";
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  res.json("gm from user routes");
-})
+router.get('/profile', gitAuthMiddleware, async (req, res) => {
+  const accessToken = req.user?.accessToken;
+  if(!accessToken) {
+    return res.status(400).json({
+      error: 'accessToken is missing'
+    });
+  }
+  try {
+    const response = await axios.get('https://api.github.com/user', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    console.log("userProfile: ", response.data);
+  
+    res.status(200).json({
+      message: 'user profile fetched successfully',
+      data: response.data,
+    });
+  } catch (error) {
+    console.error("error fetching user profile: ", error);
+    return res.status(500).json({
+      error: 'error fetching user profile'
+    });
+  }
+});
 
 // get user profile details
 router.get('/:userId', authMiddleware, async (req, res) => {
