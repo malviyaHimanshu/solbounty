@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import passport, { session } from "passport";
 import { User } from "../config/types";
 import { Strategy as GitHubStrategy } from 'passport-github2';
-import { DASHBOARD_URL, GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, JWT_SECRET } from "../config/environment";
+import { FRONTEND_URL, GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, JWT_SECRET } from "../config/environment";
 
 const router = Router();
 
@@ -40,12 +40,54 @@ passport.use(new GitHubStrategy({
 router.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
 
 // github callback route
-router.get('/github/callback', passport.authenticate('github', { failureRedirect: '/' }), (req, res) => {
-  res.redirect(DASHBOARD_URL);
+router.get('/github/callback', passport.authenticate('github', { failureRedirect: '/' }), async (req, res) => {
+
+  // check for the user in the database
+  const username = req.user?.username;
+  if(!username) {
+    return res.status(400).json({
+      error: 'username is missing'
+    });
+  }
+
+  try {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        github_username: username
+      }
+    });
+
+    if(existingUser) {
+      const token = jwt.sign({
+        userId: existingUser.id
+      }, JWT_SECRET, {
+        expiresIn: '7d'
+      });
+
+      // Set token as an HTTP-only cookie
+      res.cookie('auth_token', token, {
+        httpOnly: true, // Prevents client-side access via JavaScript
+        secure: process.env.NODE_ENV === 'production', // Ensures the cookie is only sent over HTTPS in production
+        maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration set to 7 days
+        sameSite: 'strict', // CSRF protection
+      });
+
+      return res.redirect(`${FRONTEND_URL}/dashboard`);
+    } else {
+      return res.redirect(`${FRONTEND_URL}/login`);
+    }
+  } catch (error) {
+    console.error("error signing in: ", error);
+    return res.status(500).json({
+      error: 'error occurred while signing in'
+    });
+  }
 });
 
 // logout route
-router.get('/logout', (req: Request, res: Response, next: NextFunction) => {
+router.post('/logout', (req: Request, res: Response, next: NextFunction) => {
+  // clear cookie
+  res.clearCookie('auth_token');
   // req.logout by passport removes the req.user property and clears the login session (if any).
   req.logout((err) => {
     if(err) return next(err);
@@ -58,7 +100,44 @@ router.get('/logout', (req: Request, res: Response, next: NextFunction) => {
   })
 })
 
-router.post('/login', async (req, res) => {
+router.get('/status', (req: Request, res: Response) => {
+  const token = req.cookies?.auth_token;
+  console.log("token: ", req.cookies);
+  if(!token) {
+    console.log("no token found");
+    return res.status(401).json({
+      isAuthenticated: false
+    });
+  }
+  
+  try {
+    console.log("we here");
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    console.log("decoded: ", decoded);
+    console.log("isAuthenticated: ", req.isAuthenticated());
+
+    if(!decoded || !req.isAuthenticated()) {
+      console.log("omg we are here");
+      return res.status(401).json({
+        isAuthenticated: false
+      });
+    }
+    
+    console.log("we fucked");
+    return res.status(200).json({
+      isAuthenticated: true,
+      userId: decoded
+    });
+  } catch (error) {
+    console.log("error checking status", error);
+    return res.status(401).json({
+      isAuthenticated: false
+    });
+  }
+})
+
+router.post('/register', async (req, res) => {
   const { pubKey } = req.body;
   if(!pubKey) {
     return res.status(400).json({
@@ -66,7 +145,7 @@ router.post('/login', async (req, res) => {
     });
   }
 
-  if(!req.user || req.isAuthenticated()) {
+  if(!req.user || !req.isAuthenticated()) {
     return res.status(401).json({
       error: 'unauthorized user'
     });
@@ -100,9 +179,16 @@ router.post('/login', async (req, res) => {
       expiresIn: '7d'
     });
 
+    res.cookie('auth_token', token, {
+      httpOnly: true, // Prevents client-side access via JavaScript
+      secure: process.env.NODE_ENV === 'production', // Ensures the cookie is only sent over HTTPS in production
+      maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration set to 7 days
+      sameSite: 'strict', // CSRF protection
+    });
+
     return res.status(200).json({
-      token,
-    })
+      message: 'user registered successfully',
+    });
 
   } catch (error) {
     console.error("error signing in: ", error);

@@ -1,26 +1,55 @@
 "use client";
 import Button from "@/components/button"
 import SolanaLogo from "@/components/img/SolanaLogo"
-import { CoffeeOutlinedIcon, CoffeeSolidIcon, LoginIcon } from "@/icons"
+import { LoginIcon } from "@/icons"
 import { instrumentSerif, inter, interTight } from "@/lib/fonts"
 import { GitHubLogoIcon } from "@radix-ui/react-icons"
-import { signIn, useSession } from "next-auth/react"
 import { User } from "@nextui-org/react";
 import ConnectWallet from "@/components/connect-wallet";
 import Link from "next/link";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { API_URL } from "@/lib/constants";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   // TODO: update the github to get the gitgub username as well
-  const { data: session, status } = useSession();
+  const [profile, setProfile] = useState<any>(null);
+  const [status, setStatus] = useState<'authenticated' | 'unauthenticated'>('unauthenticated')
 
   const handleClick = () => {
-    signIn("github", {
-      callbackUrl: `${window.location.origin}/login`,
+    window.location.href = `${API_URL}/v1/auth/github`;
+  }
+
+  useEffect(() => {
+    getProfileData();
+  }, []);
+
+  const getProfileData = async () => {
+    await axios.get(`${API_URL}/v1/user/profile`, {
+      withCredentials: true,
+    }).then((res) => {
+      const userData = res.data.data;
+      console.log(userData);
+      setProfile(userData);
+      setStatus('authenticated');
+    }).catch((err) => {
+      console.log(err);
     });
   }
 
   const handleLogin = () => {
-    // TODO: post pubkey and github username to server
+    axios.post(`${API_URL}/v1/auth/register`, {
+      pubKey: 'pubKey',
+    }, {
+      withCredentials: true,
+    }).then((res) => {
+      console.log("register data: ", res.data);
+      router.push('/dashboard');
+    }).catch((err) => {
+      console.log(err);
+    });
   }
 
   return (
@@ -41,7 +70,7 @@ export default function LoginPage() {
       <div className="h-full w-full sm:w-1/2 grid place-content-center p-10">
         <div>
           <h1 className={ instrumentSerif.className + " text-5xl font-semibold text-zinc-700"}>fork it.</h1>
-          { status !== 'authenticated' && (
+          { status === 'unauthenticated' && (
             <div>
               <p className="text-zinc-500 mt-1">login to your account to continue.</p>
               <Button onClick={handleClick} color="black" className="flex items-center justify-center gap-2 my-5 mb-20">
@@ -50,15 +79,18 @@ export default function LoginPage() {
               </Button>
             </div>
           )}
-          {status === 'authenticated' && (
+          
+          { status === 'authenticated' && (
             <div className="flex flex-col items-start gap-7 mt-7">
-              <User 
-                name={session.user?.name}
-                description={session.user?.email}
-                avatarProps={{
-                  src: session.user?.image as string,
-                }}
-              />
+              {profile && (
+                <User 
+                  name={profile?.name}
+                  description={profile?.login}
+                  avatarProps={{
+                    src: profile?.avatar_url as string,
+                  }}
+                />
+              )}
               
               <hr className="w-full border-t border-zinc-300" />
               <div>
@@ -73,7 +105,6 @@ export default function LoginPage() {
             </div>
           )}
         </div>
-
       </div>
     </main>
   )

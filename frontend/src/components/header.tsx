@@ -2,11 +2,29 @@
 import SolanaLogo from "./img/SolanaLogo";
 import DynamicBreadcrumbs from "./dynamic-breadcrumbs";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { Avatar } from "@nextui-org/react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { API_URL } from "@/lib/constants";
 
 export default function Header() {
-  const { data: session, status } = useSession();
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    getProfileData();
+  }, []);
+
+  const getProfileData = async () => {
+    await axios.get(`${API_URL}/v1/user/profile`, {
+      withCredentials: true,
+    }).then((res) => {
+      const userData = res.data.data;
+      console.log(userData);
+      setProfile(userData);
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
 
   return (
     <header className="fixed left-0 top-0 right-0 z-10 text-zinc-500 w-full h-[70px] border-b border-white">
@@ -22,7 +40,7 @@ export default function Header() {
 
         <div className="p-5 px-10 flex items-center justify-between w-[calc(100vw-250px)] lg:w-[calc(100vw-350px)]">
           <DynamicBreadcrumbs />
-          <Avatar name={`${session?.user?.name}`} src={`${session?.user?.image}`} size="sm" />
+          <Avatar name={`${profile?.name}`} src={`${profile?.avatar_url}`} size="sm" />
         </div>
       </div>
     </header>

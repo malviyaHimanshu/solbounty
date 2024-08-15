@@ -1,6 +1,6 @@
 import Button from "@/components/button";
 import SolanaLogo from "@/components/img/SolanaLogo";
-import LoginWithGitHub from "@/components/login";
+import LoginButton from "@/components/login-button";
 import { interTight } from "@/lib/fonts";
 import Link from "next/link";
 
@@ -14,12 +14,7 @@ export default async function LandingPage() {
           <SolanaLogo height="18" color="#18181B" />
           solbounty
         </h1>
-        <div className="flex items-center gap-2">
-          <Link href={'/login'}>
-            <Button color="white">Login</Button>
-          </Link>
-          <LoginWithGitHub />
-        </div>
+        <LoginButton />
       </header>
 
       <div className="flex flex-col px-10">

@@ -16,7 +16,7 @@ import {
   CoinbaseWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
-import { SessionProvider } from "next-auth/react";
+import { AuthProvider } from "@/contexts/auth-context";
 require("@solana/wallet-adapter-react-ui/styles.css");
 
 export function Providers({
@@ -41,9 +41,9 @@ export function Providers({
         <ConnectionProvider endpoint={endpoint}>
           <WalletProvider wallets={wallets} autoConnect>
             <WalletModalProvider>
-              <SessionProvider>
+              <AuthProvider>
                 {children}
-              </SessionProvider>
+              </AuthProvider>
             </WalletModalProvider>
           </WalletProvider>
         </ConnectionProvider>

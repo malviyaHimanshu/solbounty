@@ -1,23 +1,39 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { coromorantGaramond, instrumentSerif, ptSerif } from "@/lib/fonts";
-import { FaceIcon, LightningBoltIcon, PlusCircledIcon } from "@radix-ui/react-icons";
-import { Card } from '@nextui-org/react';
-import { useSession } from "next-auth/react";
 import { MedalOutlinedIcon, PlusOutlinedIcon } from "@/icons";
 import Link from "next/link";
+import { useAuth } from "@/contexts/auth-context";
+import { useEffect, useState } from "react";
+import { API_URL } from "@/lib/constants";
+import axios from "axios";
+import ProtectedRoute from "@/components/protected-route";
 
+// TODO: protect this route
 export default function Home() {
-  const { data: session, status } = useSession();
+  const [profile, setProfile] = useState<any>(null);
 
-  if (status === "loading") return <p>Loading...</p>;
+  useEffect(() => {
+    getProfileData();
+  }, []);
+
+  const getProfileData = async () => {
+    await axios.get(`${API_URL}/v1/user/profile`, {
+      withCredentials: true,
+    }).then((res) => {
+      const userData = res.data.data;
+      console.log(userData);
+      setProfile(userData);
+    }).catch((err) => {
+      console.log(err);
+    });
+  }
 
   return (
-    <>
-      <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Welcome back, {session?.user?.name?.split(' ')[0]}</h1>
+    <ProtectedRoute>
+      <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Welcome back, {profile?.name.split(' ')[0]}</h1>
       <p className="mt-2 text-zinc-500">create new bounties or explore all open bounties.</p>
 
-      {/* TODO: update ui for these cards */}
       <div className="grid grid-cols-1 gap-5 mt-10 sm:grid-cols-2 lg:grid-cols-3">
         <Link href={'/dashboard/create-bounty'}>
           <div className="border border-zinc-200 rounded-[13px] cursor-pointer outline outline-transparent hover:outline-4 hover:outline-zinc-100 transition-all 0.2s ease-in-out">
@@ -43,6 +59,6 @@ export default function Home() {
           </div>
         </Link>
       </div>
-    </>
+    </ProtectedRoute>
   )
 }

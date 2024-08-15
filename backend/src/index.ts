@@ -1,14 +1,25 @@
 
 import express from 'express';
-import { EXPRESS_SESSION_SECRET, PORT } from './config/environment';
+import { EXPRESS_SESSION_SECRET, FRONTEND_URL, PORT } from './config/environment';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import bountyRoutes from './routes/bounty.routes';
 import passport from 'passport';
 import session from 'express-session';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
+
+// cors middleware
+app.use(cors({
+  origin: FRONTEND_URL,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: 'Content-Type,Authorization',
+  credentials: true,
+}))
 
 // session middleware
 app.use(session({
