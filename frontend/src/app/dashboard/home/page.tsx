@@ -3,11 +3,9 @@ import { cn } from "@/lib/utils";
 import { coromorantGaramond, instrumentSerif, ptSerif } from "@/lib/fonts";
 import { MedalOutlinedIcon, PlusOutlinedIcon } from "@/icons";
 import Link from "next/link";
-import { useAuth } from "@/contexts/auth-context";
 import { useEffect, useState } from "react";
 import { API_URL } from "@/lib/constants";
 import axios from "axios";
-import ProtectedRoute from "@/components/protected-route";
 
 // TODO: protect this route
 export default function Home() {
@@ -30,7 +28,7 @@ export default function Home() {
   }
 
   return (
-    <ProtectedRoute>
+    <>
       <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Welcome back, {profile?.name.split(' ')[0]}</h1>
       <p className="mt-2 text-zinc-500">create new bounties or explore all open bounties.</p>
 
@@ -59,6 +57,6 @@ export default function Home() {
           </div>
         </Link>
       </div>
-    </ProtectedRoute>
+    </>
   )
 }

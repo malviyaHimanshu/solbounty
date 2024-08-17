@@ -1,6 +1,11 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import jwt from 'jsonwebtoken'
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+// Extend dayjs with relativeTime plugin
+dayjs.extend(relativeTime);
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -40,4 +45,8 @@ export function verifyToken(token: any): any {
     console.error('Error verifying token: ', error);
     return null;
   }
+}
+
+export function fromNow(date: string): string {
+  return dayjs(date).fromNow();
 }

@@ -1,4 +1,5 @@
 import Button from "@/components/button";
+import CallToAction from "@/components/call-to-action";
 import SolanaLogo from "@/components/img/SolanaLogo";
 import LoginButton from "@/components/login-button";
 import { interTight } from "@/lib/fonts";
@@ -26,9 +27,7 @@ export default async function LandingPage() {
             put bounties on issues and reward contributors instantly on Solana
             right from GitHub.
           </p>
-          <Link href="/dashboard" className="mt-3">
-            <Button color="green">{"try now →"}</Button>
-          </Link>
+          <CallToAction />
         </div>
       </div>
     </main>

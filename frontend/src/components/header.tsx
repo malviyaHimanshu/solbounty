@@ -34,6 +34,7 @@ export default function Header() {
             <div className="flex items-center gap-2">
               <SolanaLogo height="18" monoChrome={false} />
               <h1 className="text-lg font-medium tracking-tight text-zinc-700">solbounty</h1>
+              <div className="py-[1px] px-[5px] text-[10px] font-medium rounded-md bg-green-100 text-green-600 border border-green-500">early access</div>
             </div>
           </Link>
         </div>

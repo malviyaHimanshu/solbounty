@@ -13,12 +13,8 @@ export default function ProtectedRoute({children}: {children: React.ReactNode}) 
     }
   }, [isLoggedIn, router]);
 
-  if(isLoggedIn === undefined) {
+  if(!isLoggedIn) {
     return <div>Loading...</div>;
-  }
-
-  if(isLoggedIn === false) {
-    return null;
   }
 
   return <>{children}</>

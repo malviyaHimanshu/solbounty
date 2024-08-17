@@ -4,7 +4,6 @@ import SolanaLogo from "@/components/img/SolanaLogo";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Chip } from "@nextui-org/react";
 import { useEffect } from "react";
-import ProtectedRoute from "@/components/protected-route";
 
 export default function Solve() {
   const { publicKey, connected } = useWallet();
@@ -17,7 +16,7 @@ export default function Solve() {
   }, [connected, publicKey]);
 
   return (
-    <ProtectedRoute>
+    <>
       <div className="flex flex-col gap-5" suppressHydrationWarning>
         <div className="border border-zinc-200 transition-all 0.2s ease-in-out rounded-[13px]">
           <div className="flex items-center justify-between transition-all 0.2s ease-in-out border-2 border-white p-7 rounded-xl">
@@ -36,6 +35,6 @@ export default function Solve() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
+    </>
   )
 }
