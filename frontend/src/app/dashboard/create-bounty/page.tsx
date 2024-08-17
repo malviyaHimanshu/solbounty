@@ -4,7 +4,7 @@ import { cn, fromNow } from "@/lib/utils";
 import { Avatar, Input, Skeleton } from "@nextui-org/react";
 import { CheckIcon } from "@radix-ui/react-icons";
 import React, { useState } from "react";
-import { z } from "zod";
+import { isValid, z } from "zod";
 import axios from "axios";
 import IssueOpenSymbol from "@/components/img/IssueOpenSymbol";
 import ReactMarkdown from "react-markdown";
@@ -14,24 +14,40 @@ import "highlight.js/styles/github.css";
 import IssueCloseSymbol from "@/components/img/IssueCloseSymbol";
 import USDCLogo from "@/components/img/USDCLogo";
 import SolanaLogo from "@/components/img/SolanaLogo";
+import Button from "@/components/button";
+import { PlusOutlinedIcon } from "@/icons";
+import toast from "react-hot-toast";
 
 const githubIssueSchema = z.string().regex(
   /^https:\/\/github\.com\/([\w-]+)\/([\w-]+)\/issues\/(\d+)$/,
   'Invalid GitHub issue URL'
 );
 
+interface Token {
+  name: string;
+  symbol: string;
+  logo: React.ReactNode;
+}
+
 export default function CreateBounty() {
-  const [value, setValue] = useState<string | null>(null);
-  const [isValid, setIsValid] = useState<boolean>(false);
+  const [issueUrl, setIssueUrl] = useState<string | null>(null);
+  const [isIssueUrlValid, setIsIssueUrlValid] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const [issue, setIssue] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [tokenLogo, setTokenLogo] = useState<React.ReactNode | null>(<USDCLogo height="14" />);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [tokenAmount, setTokenAmount] = useState<string | null>(null);
+  const [token, setToken] = useState<Token | null>({
+    name: 'USDC',
+    symbol: 'USDC',
+    logo: <USDCLogo height="14" />,
+  });
+
+  const handleIssueUrlChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    setValue(inputValue);
+    setIssueUrl(inputValue);
 
     if (!isDirty) {
       setIsDirty(true);
@@ -39,7 +55,7 @@ export default function CreateBounty() {
 
     try {
       githubIssueSchema.safeParse(inputValue);
-      setIsValid(true);
+      setIsIssueUrlValid(true);
       setError(null);
 
       // Extract owner, repo, and issue number from the URL using match
@@ -58,7 +74,7 @@ export default function CreateBounty() {
       console.log(response.data);
       setIssue(response.data);
     } catch (err) {
-      setIsValid(false);
+      setIsIssueUrlValid(false);
       setIssue(null);
       setLoading(false);
       setError(
@@ -71,20 +87,47 @@ export default function CreateBounty() {
     }
   };
 
+  const handleTokenAmountChange = (e: any) => {
+    const inputValue = e.target.value;
+    if (/^\d*\.?\d*$/.test(inputValue)) { // Regex to allow only numbers and decimal points
+      setTokenAmount(inputValue);
+    }
+  }
+
   const handleTokenChange = (e: any) => {
-    console.log(e.target.value);
     switch (e.target.value) {
       case 'USDC':
-        console.log('USDC selected');
-        setTokenLogo(<USDCLogo height="14" />);
+        const USDCToken = {
+          name: 'USDC',
+          symbol: 'USDC',
+          logo: <USDCLogo height="14" />,
+        }
+        setToken(USDCToken);
         break;
       case 'SOL':
-        console.log('SOL selected');
-        setTokenLogo(<SolanaLogo height="12" />);
+        const SOLToken = {
+          name: 'Solana',
+          symbol: 'SOL',
+          logo: <SolanaLogo height="12" />,
+        }
+        setToken(SOLToken);
         break;
       default:
         console.error('Invalid token selected');
     }
+  }
+
+  const handleCreateBounty = () => {
+    if (!issueUrl || !tokenAmount) {
+      setIsDirty(true);
+      return;
+    }
+
+    // toast.success('Bounty created successfully');
+
+    console.log('Creating bounty');
+    console.log('issue url :', issueUrl);
+    console.log('amount :', tokenAmount);
   }
 
   return (
@@ -92,8 +135,8 @@ export default function CreateBounty() {
       <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Create bounty</h1>
       <p className="mt-2 text-zinc-500">Create a new bounty and get it published on GitHub.</p>
 
-      <div className="mt-10">
-        <div className="flex items-center gap-5">  
+      <div className="mt-10 pb-20">
+        <div className="flex flex-wrap md:flex-nowrap items-start gap-5">  
           <Input
             isRequired
             type="text"
@@ -102,30 +145,33 @@ export default function CreateBounty() {
             labelPlacement="outside"
             description="URL or short identifier of the issue"
             variant="bordered"
-            value={value || ''}
-            onChange={handleInputChange}
-            isInvalid={isDirty && !isValid}
+            value={issueUrl || ''}
+            onChange={handleIssueUrlChange}
+            isInvalid={isDirty && !isIssueUrlValid}
             errorMessage={error}
-            endContent={isDirty && isValid && (
+            endContent={isDirty && isIssueUrlValid && (
               <div className="p-0.5 rounded-full bg-green-500">
                 <CheckIcon color="white" />
               </div>
             )}
-            color={(isDirty && isValid) ? 'success' : 'default'}
+            color={(isDirty && isIssueUrlValid) ? 'success' : 'default'}
             // isDisabled={loading} // Disable input while loading
           />
 
           <Input
             isRequired
+            className="max-w-sm"
             type="number"
             label="Amount"
             placeholder="0.00"
             labelPlacement="outside"
             description="Amount you'll pay beforehand which goes to contributor"
             variant="bordered"
+            value={tokenAmount || ''}
+            onChange={handleTokenAmountChange}
             startContent={
               <div className="pointer-events-none flex items-center">
-                { tokenLogo }
+                { token?.logo }
               </div>
             }
             endContent={
@@ -148,24 +194,32 @@ export default function CreateBounty() {
           <div className="mt-5">
             { issue && (
               <>
-                <h1 className="text-2xl font-medium tracking-tight text-zinc-800">
+                <h1 className="text-3xl font-medium tracking-tight text-zinc-800">
                   {issue.title}
                   <span className="text-zinc-500 font-normal">&nbsp;#{issue.number}</span>
                 </h1>
 
-                <div className="mt-2 flex items-center gap-2">
-                  { issue.state === 'open' && (
-                    <p className="flex items-center gap-0.5 py-1 px-2 pr-3 rounded-full bg-green-600 w-fit">
-                      <IssueOpenSymbol color="#ffffff" height="14" />
-                      <span className="text-white text-sm font-medium">Open</span>
-                    </p>
-                  )}
-                  { issue.state === 'closed' && (
-                    <p className="flex items-center gap-0.5 py-1 px-2 pr-3 rounded-full bg-purple-600 w-fit">
-                      <IssueCloseSymbol color="#ffffff" height="14" />
-                      <span className="text-white text-sm font-medium">Closed</span>
-                    </p>
-                  )}
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    { issue.state === 'open' && (
+                      <p className="flex items-center gap-0.5 py-1 px-2 pr-3 rounded-full bg-green-600 border border-green-600 w-fit">
+                        <IssueOpenSymbol color="#ffffff" height="14" />
+                        <span className="text-white text-sm font-medium">Open</span>
+                      </p>
+                    )}
+                    { issue.state === 'closed' && (
+                      <p className="flex items-center gap-0.5 py-1 px-2 pr-3 rounded-full bg-purple-600 border border-purple-600 w-fit">
+                        <IssueCloseSymbol color="#ffffff" height="14" />
+                        <span className="text-white text-sm font-medium">Closed</span>
+                      </p>
+                    )}
+                    { (Number(tokenAmount) > 0) && (
+                      <p className="flex items-center gap-1 py-1 px-2 pr-3 rounded-full bg-green-100 border border-green-500 text-green-700 w-fit">
+                        { token?.logo }
+                        <span className="text-sm font-medium tracking-tight text-nowrap">{ tokenAmount } { token?.symbol }</span>
+                      </p>
+                    )}
+                  </div>
 
                   <p className="text-sm text-zinc-500">
                     <span className="font-semibold hover:underline"><a href={issue.user?.html_url}>{issue.user?.login}</a></span> opened this issue {fromNow(issue.created_at)} · {issue.comments} comments
@@ -174,20 +228,22 @@ export default function CreateBounty() {
                 
                 <hr className="mt-3 mb-5 border-zinc-200" />
 
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 w-full overflow-x-scroll">
                   <Avatar
+                    showFallback
                     src={issue.user?.avatar_url}
                     alt={issue.user?.login}
                     size="md"
+                    className="min-w-fit"
                   />
 
-                  <div className="border border-zinc-200 rounded">
-                    <div className="bg-zinc-100 px-5 py-3">
+                  <div className="border border-zinc-200 rounded-md">
+                    <div className="bg-zinc-50 px-4 py-2 rounded-t-md border-b border-zinc-200">
                       <p className="text-sm text-zinc-500">
                         <span className="font-semibold hover:underline"><a href={issue.user?.html_url}>{issue.user?.login}</a></span> commented {fromNow(issue.created_at)}
                       </p>
                     </div>
-                    <div className="p-5 text-sm">
+                    <div className="p-4 py-3 text-sm">
                       <ReactMarkdown
                         children={issue.body}
                         remarkPlugins={[remarkGfm]}
@@ -197,10 +253,19 @@ export default function CreateBounty() {
                     </div>
                   </div>
                 </div>
+                
+                <hr className="my-5 border-zinc-200" />
               </>
             )}
           </div>
         </Skeleton>
+
+        <div className="mt-5">
+          <Button disabled={!isValid || !isIssueUrlValid || isSubmitting || !tokenAmount || Number(tokenAmount) <= 0 || !issueUrl} onClick={handleCreateBounty} color="black" className="flex items-center gap-1.5">
+            <PlusOutlinedIcon color="#ffffff" />
+            Create bounty
+          </Button>
+        </div>
       </div>
     </div>
   );

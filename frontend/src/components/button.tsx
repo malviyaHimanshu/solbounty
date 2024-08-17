@@ -20,7 +20,7 @@ export default function Button({
   return (
     <button 
       className={cn(
-        `bg-gradient-to-b from-${color}-400 to-${color}-600 px-4 py-1 rounded-lg text-base font-medium transition-all duration-200 ease-in-out border-2`,
+        `bg-gradient-to-b from-${color}-400 to-${color}-600 px-4 py-1 rounded-lg text-base font-medium transition-all duration-200 ease-in-out border-2 disabled:opacity-70 disabled:cursor-not-allowed`,
         isPressed ? "scale-95" : "scale-100",
         color === "green" && "from-green-400 to-green-600 text-white border-green-300",
         color === "blue" && "from-blue-400 to-blue-600 text-white border-blue-300",
