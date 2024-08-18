@@ -17,6 +17,7 @@ import SolanaLogo from "@/components/img/SolanaLogo";
 import Button from "@/components/button";
 import { PlusOutlinedIcon } from "@/icons";
 import toast from "react-hot-toast";
+import { API_URL } from "@/lib/constants";
 
 const githubIssueSchema = z.string().regex(
   /^https:\/\/github\.com\/([\w-]+)\/([\w-]+)\/issues\/(\d+)$/,
@@ -117,17 +118,47 @@ export default function CreateBounty() {
     }
   }
 
-  const handleCreateBounty = () => {
+  const handleCreateBounty = async () => {
+    setIsSubmitting(true);
     if (!issueUrl || !tokenAmount) {
       setIsDirty(true);
       return;
     }
+    
+    // TODO: do not allow the same issue to be submitted twice, create one api for fetching and ensuring any bounties as well directly from backend
+    // TODO: handle the duplicate entry in frontend as well
+    // FUTURE: allow users to put multiple entries and show the total amount via extension
+    const createBountyPromise = axios.post(`${API_URL}/v1/bounty`, {
+      issue_url: issueUrl,
+      amount: Number(tokenAmount),
+      token: token?.symbol,
+    }, {
+      withCredentials: true
+    });
 
-    // toast.success('Bounty created successfully');
+    toast.promise(createBountyPromise, {
+      loading: 'Creating bounty...',
+      success: 'Bounty created successfully',
+      error: 'Failed to create bounty',
+    })
 
-    console.log('Creating bounty');
-    console.log('issue url :', issueUrl);
-    console.log('amount :', tokenAmount);
+    try {
+      const issueUrlValidation = githubIssueSchema.parse(issueUrl);
+      console.log(issueUrlValidation);
+
+      const tokenAmountValidation = z.string().nonempty().parse(tokenAmount);
+      console.log(tokenAmountValidation);
+
+      // Create bounty
+      const response = await createBountyPromise;
+      console.log("bounty created successfully!", response.data);
+      setIssueUrl(null);
+      setTokenAmount(null);
+      setIsSubmitting(false);
+    } catch (err) {
+      console.error(err);
+      setIsSubmitting(false);
+    }
   }
 
   return (

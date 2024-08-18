@@ -3,15 +3,8 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/environment";
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization ?? '';
-  if(!authHeader) {
-    return res.status(401).json({
-      error: 'authorization header is missing'
-    });
-  }
-
-  const token = authHeader.split(' ')[1];
-  if(!token) {
+  const authToken = req.cookies?.auth_token;
+  if(!authToken) {
     return res.status(401).json({
       error: 'token is missing'
     });
@@ -19,7 +12,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
   try {
     if(req.isAuthenticated()) {
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decoded = jwt.verify(authToken, JWT_SECRET);
       console.log("decoded: ", decoded);
       req.body.user = decoded;
       next();
