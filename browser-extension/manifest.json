@@ -3,17 +3,24 @@
   "name": "solbounty",
   "version": "1.0",
   "description": "bounties made simpler with solana",
-  "permissions": ["activeTab"],
+  "permissions": [
+    "tabs",
+    "storage",
+    "cookies",
+    "activeTab",
+    "nativeMessaging"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "http://localhost:8080/*",
+    "https://github.com/*"
+  ],
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "js": ["content.js"]
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["bundle.js"],
-      "matches": ["https://github.com/*"]
+      "js": ["index.js"]
     }
   ]
 }
