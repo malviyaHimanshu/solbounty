@@ -71,6 +71,52 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   // TODO: add claim bounty from a specific issue
+  if(message.type === 'CLAIM_BOUNTY') {
+    console.log('message hello hello claim', message);
+
+    axios.post('http://localhost:8080/v1/bounty/attempt', {
+      bountyId: message.bountyId,
+      signature: message.signature
+    }, {
+      withCredentials: true
+    }).then(response => {
+      console.log('we here at response', response.data);
+      sendResponse({
+        data: response.data
+      });
+    }).catch(err => {
+      console.log('err', err);
+      sendResponse({
+        data: null
+      });
+    });
+
+    return true
+  }
+
+  // TODO: get pr details for a specific pr
+  if(message.type === 'GET_PR_DETAIL') {
+    console.log('message hello hello pr', message);
+
+    axios.post('http://localhost:8080/v1/bounty/detail/pr_url', {
+      prUrl: message.prUrl
+    }, {
+      withCredentials: true
+    }).then(response => {
+      console.log('we here at response', response.data);
+      sendResponse({
+        data: response.data
+      });
+    }).catch(err => {
+      console.log('err', err);
+      sendResponse({
+        data: null
+      });
+    });
+
+    return true
+  }
+
 
   // TODO: add approve bounty for the pr raised
 });

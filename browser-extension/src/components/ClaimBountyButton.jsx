@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import SolanaLogo from './img/SolanaLogo';
 import { useDarkMode } from '../App';
+import browser from 'webextension-polyfill';
 
-const ClaimBountyButton = () => {
+const ClaimBountyButton = ({
+  bounties,
+}) => {
   const isDarkMode = useDarkMode();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [issues, setIssues] = useState([]);
@@ -10,38 +13,23 @@ const ClaimBountyButton = () => {
 
   useEffect(() => {
     // TODO: fetch issues from API
-    setIssues([
-      {
-        id: 591,
-        title: 'Statically analyze imports of a Pkl program',
-      },
-      {
-        id: 598,
-        title: 'Exception in code generation on Java 22 - NoSuchMethodError: void sun.misc.Unsafe.ensureClassInitialized',
-      },
-      {
-        id: 590,
-        title: 'Performance inspection tools',
-      },
-      {
-        id: 592,
-        title: 'Statically analyze imports of a Pkl program',
-      },
-      {
-        id: 599,
-        title: 'Exception in code generation on Java 22 - NoSuchMethodError: void sun.misc.Unsafe.ensureClassInitialized',
-      },
-      {
-        id: 560,
-        title: 'Performance inspection tools',
-      },
-    ]);
+    setIssues(bounties);
   }, []);
 
   const handleButtonClick = (event) => {
     event.preventDefault();
-    console.log(`${selectedOption} clicked`);
-    alert(`Action for ${selectedOption}`);
+    console.log(`${selectedOption.id} clicked`);
+
+    // TODO: send claim request to API
+    browser.runtime.sendMessage({
+      type: 'CLAIM_BOUNTY',
+      bountyId: selectedOption.id,
+      signature: 'some_signature',
+    }).then(response => {
+      console.log('we ball ', response);
+    }).catch(err => {
+      console.log('got fucked up', err);
+    });
   };
 
   const handleDropdownToggle = () => {
@@ -88,8 +76,8 @@ const ClaimBountyButton = () => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '5px 12px',
+            gap: '6px',
+            padding: '2.5px 8px',
             backgroundColor: '#2f363d',
             color: '#ffffff',
             borderTop: 'none',
@@ -98,13 +86,14 @@ const ClaimBountyButton = () => {
             borderRight: 'solid 1px #444c56',
             borderRadius: '0',
             cursor: 'pointer',
-            fontSize: '14px',
-            lineHeight: '20px',
+            fontSize: '12px',
+            lineHeight: '1.66',
           }}
+          disabled={!selectedOption}
           onClick={handleButtonClick}
         >
-          <SolanaLogo height="14" />
-          Claim for Issue {selectedOption ? `#${selectedOption}` : ''}
+          <SolanaLogo height="11" />
+          Claim for Issue {selectedOption ? `#${selectedOption.issue_number}` : ''}
         </button>
         <button
           className='solbounty-dropdown-toggle'
@@ -113,9 +102,9 @@ const ClaimBountyButton = () => {
           style={{
             height: '100%',
             width: '40px',
-            padding: '5px 12px',
-            fontSize: '14px',
-            lineHeight: '20px',
+            padding: '2.5px 8px',
+            fontSize: '12px',
+            lineHeight: '1.66',
             backgroundColor: '#2f363d',
             color: '#ffffff',
             border: 'none',
@@ -151,18 +140,18 @@ const ClaimBountyButton = () => {
                 backgroundColor: '#161B22',
                 color: '#ffffff',
                 cursor: 'pointer',
-                fontSize: '14px',
+                fontSize: '12px',
                 lineHeight: '16px',
                 width: '100%',
                 textAlign: 'left',
                 transition: 'background-color 0.1s ease, color 0.1s ease',
               }}
-              onClick={() => handleOptionChange(issue.id)}
+              onClick={() => handleOptionChange(issue)}
               onMouseOver={() => handleMouseOver(issue.id)}
               onMouseOut={() => handleMouseOut(issue.id)}
             >
-              <p style={{margin: '0', color: 'white'}}>#{issue.id}</p>
-              <p style={{margin: '0', color: '#8D96A0', fontSize: '12px', transition: 'color 0.1s ease'}}>{issue.title}</p>
+              <p style={{margin: '0', color: 'white'}}>#{issue.issue_number} • {issue.amount} {issue.token}</p>
+              <p style={{margin: '0', color: '#8D96A0', fontSize: '11px', transition: 'color 0.1s ease'}}>{issue.issue_title}</p>
             </div>
           ))}
         </div>
