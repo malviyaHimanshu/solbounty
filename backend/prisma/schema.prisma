@@ -29,6 +29,9 @@ model Bounty {
   id                    Int       @id @default(autoincrement())
 
   issue_url             String    @unique
+  issue_owner           String
+  issue_repo            String
+  issue_number          Int
   amount                Int
   token                 String
 
