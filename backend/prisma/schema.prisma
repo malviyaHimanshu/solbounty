@@ -13,6 +13,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AttemptStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id                    Int       @id @default(autoincrement())
   github_username       String    @unique
@@ -20,6 +26,7 @@ model User {
 
   bounties_won          Bounty[]  @relation("WonByUser")
   bonties_created       Bounty[]  @relation("CreatedByUser")
+  bounties_attempted    Attempt[]
 
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
@@ -31,15 +38,36 @@ model Bounty {
   issue_url             String    @unique
   issue_owner           String
   issue_repo            String
+  issue_title           String
   issue_number          Int
+
   amount                Int
   token                 String
 
   created_by            User      @relation("CreatedByUser", fields: [created_by_id], references: [id])
   created_by_id         Int
 
+  attempts              Attempt[]
+
   won_by                User?      @relation("WonByUser", fields: [won_by_id], references: [id])
   won_by_id             Int?
+
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+}
+
+model Attempt {
+  id                    Int       @id @default(autoincrement())
+
+  bounty                Bounty    @relation(fields: [bounty_id], references: [id])
+  bounty_id             Int
+
+  user                  User      @relation(fields: [user_id], references: [id])
+  user_id               Int
+
+  status                AttemptStatus
+
+  signature             String
 
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt

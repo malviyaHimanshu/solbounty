@@ -2,6 +2,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/authMiddleware";
 import prisma from "../config/prismaClient";
+import axios from "axios";
 
 const router = Router();
 
@@ -43,12 +44,18 @@ router.post('/', authMiddleware, async (req, res) => {
   const issue_number = issue_url.split('/')[6];
 
   try {
+    // get issue details from github api
+    const issueResponse = await axios.get(
+      `https://api.github.com/repos/${issue_owner}/${issue_repo}/issues/${issue_number}`
+    );
+
     const bounty = await prisma.bounty.create({
       data: {
         issue_url,
         issue_owner,
         issue_repo,
         issue_number: Number(issue_number),
+        issue_title: issueResponse.data.title,
         amount,
         token,
         created_by_id: userId
@@ -170,6 +177,65 @@ router.post('/detail/issue_url', async (req, res) => {
   }
 });
 
+router.post('/detail/pr_url', authMiddleware, async (req, res) => {
+  const prUrl = req.body.prUrl;
+  const username = req.user?.username;
+  const accessToken = req.user?.accessToken;
+  console.log("this is the username: ", username);
+  
+  if (!prUrl) {
+    return res.status(400).json({
+      error: 'prUrl is required'
+    });
+  }
+
+  const regex = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)$/;
+  const match = prUrl.match(regex);
+  if (!match) {
+    return res.status(400).json({
+      error: 'prUrl is not a valid github pr url'
+    });
+  }
+
+  const owner = match[1];
+  const repo = match[2];
+  const prNumber = match[3];
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`;
+
+  try {
+    const prResponse = await axios.get(apiUrl, {
+      headers: {
+        'Authorization': `token ${accessToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    console.log("prResponse: ", prResponse.data.user.login);
+
+    const user = await prisma.user.findUnique({
+      where: {
+        github_username: username
+      }
+    });
+
+    if(!user || user.github_username !== prResponse.data.user.login) {
+      return res.status(400).json({
+        error: 'user is not authorized to claim this bounty'
+      });
+    }
+
+    return res.status(200).json({
+      message: 'user fetched successfully',
+      data: user
+    });
+
+  } catch (error) {
+    console.error("error fetching bounty: ", error);
+    return res.status(500).json({
+      error: 'error fetching bounty'
+    });
+  }
+});
+
 // TODO: add auth middleware
 // get all bounties by owner and repo
 router.post('/by_owner_repo', async (req, res) => {
@@ -262,6 +328,119 @@ router.get('/won_by/:userId', authMiddleware, async (req, res) => {
 });
 
 // TODO: get bounties based on the organisation / project
+
+
+// TODO: create an attempt for a bounty
+// TODO: add auth middleware
+router.post('/attempt', authMiddleware, async (req, res) => {
+  const { bountyId, signature } = req.body;
+  const userId = req.body.user.userId;
+  if (!bountyId || !signature) {
+    return res.status(400).json({
+      error: 'bountyId and signature are required'
+    });
+  }
+
+  try {
+    // check whether user has already attempted this bounty
+    const existingAttempt = await prisma.attempt.findFirst({
+      where: {
+        bounty_id: Number(bountyId),
+        user_id: Number(userId)
+      }
+    });
+
+    if(existingAttempt) {
+      return res.status(400).json({
+        error: 'User has already attempted this bounty'
+      });
+    }
+
+    const attempt = await prisma.attempt.create({
+      data: {
+        bounty: {
+          connect: {
+            id: Number(bountyId)
+          }
+        },
+        user: {
+          connect: {
+            id: Number(userId)
+          }
+        },
+        status: 'IN_PROGRESS',
+        signature: signature
+      }
+    })
+
+    return res.status(200).json({
+      message: 'attempt created successfully',
+      data: attempt
+    });
+
+  } catch (error) {
+    console.error("error creating attempt: ", error);
+    return res.status(500).json({
+      error: 'error creating attempt'
+    });
+  }
+});
+
+// TODO: approve a bounty claim
+router.post('/approve', authMiddleware, async (req, res) => {
+  const { attemptId, signature } = req.body;
+
+  try {
+    const attempt = await prisma.attempt.findUnique({
+      where: {
+        id: Number(attemptId)
+      },
+      include: {
+        bounty: true
+      }
+    });
+
+    if(!attempt) {
+      return res.status(404).json({
+        error: 'attempt not found'
+      });
+    }
+
+    const updatedAttempt = await prisma.attempt.update({
+      where: {
+        id: Number(attemptId)
+      },
+      data: {
+        status: 'COMPLETED',
+        signature: signature
+      }
+    })
+
+    const updatedBounty = await prisma.bounty.update({
+      where: {
+        id: attempt.bounty.id
+      },
+      data: {
+        won_by_id: attempt.user_id
+      }
+    });
+
+    return res.status(200).json({
+      message: 'bounty claim approved successfully',
+      data: updatedAttempt
+    });
+
+  } catch (error) {
+    console.error("error approving bounty claim: ", error);
+    return res.status(500).json({
+      error: 'error approving bounty claim'
+    });
+  }
+});
+
+
+// TODO: get all the attemps for a bounty
+
 
 
 export default router;

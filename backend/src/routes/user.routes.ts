@@ -110,6 +110,10 @@ router.post('/update', authMiddleware, async (req, res) => {
   }
 })
 
+
+// TODO: get all the attemptted bounties by a user
+
+
 // TODO: show all the users who have won bounties
 
 
