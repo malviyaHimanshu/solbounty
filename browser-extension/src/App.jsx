@@ -4,6 +4,7 @@ import BountyButton from './components/BountyButton';
 import BountyLabel from './components/BountyLabel';
 import ClaimBountyButton from './components/ClaimBountyButton';
 import browser from 'webextension-polyfill';
+import _ from 'lodash';
 
 export const useDarkMode = () => {
   const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -161,24 +162,13 @@ function getOwnerAndRepoForPRPage() {
   }
 }
 
-// function getCurrentIssueDetail() {
-//   const currentUrl = window.location.href;
-//   const issuePageRegex = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/(\d+)$/;
-//   const match = currentUrl.match(issuePageRegex);
-
-//   if(match) {
-//     return {
-//       issueUrl: currentUrl,
-//     };
-//   } else {
-//     return null;
-//   }
-// }
-
 const App = () => {
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   // const [bounties, setBounties] = useState([]);
+  const [hasFetchedPRDetails, setHasFetchedPRDetails] = useState(false);
+  const [hasFetchedBounties, setHasFetchedBounties] = useState(false);
+  const [hasFetchedBountyDetails, setHasFetchedBountyDetails] = useState(false);
 
   const checkAuthStatus = () => {
     browser.runtime.sendMessage({
@@ -191,9 +181,9 @@ const App = () => {
     });
   }
 
-  const getAllBountiesByOwnerRepo = () => {
+  const getAllBountiesByOwnerRepo = _.throttle(() => {
     const data = getOwnerAndRepoForIssueTab();
-    if(data) {
+    if(data && !hasFetchedBounties) {
       console.log('owner: ', data.owner);
       console.log('repo: ', data.repo);
 
@@ -205,17 +195,18 @@ const App = () => {
         console.log('we ball the bounties: ', response);
         // setBounties(response.data.data);
         addBountyLabelonIssues(response.data.data);
+        setHasFetchedBounties(true);
       }).catch(err => {
         console.log('we fucked with bounties: ', err);
       })
     }
-  }
+  }, 2000); // throttle using lodash to run at most once every 2s
 
-  const getBountyDetailByIssue = () => {
+  const getBountyDetailByIssue = _.throttle(() => {
     const currentUrl = window.location.href;
     const issuePageRegex = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/(\d+)$/;
     const match = currentUrl.match(issuePageRegex);
-    if(match) {
+    if(match && !hasFetchedBountyDetails) {
       console.log('issueUrl: ', currentUrl)
       
       browser.runtime.sendMessage({
@@ -224,13 +215,14 @@ const App = () => {
       }).then(response => {
         console.log('we ball with specific bounty: ', response);
         addBountyLabelonIssuePage(response.data.data);
+        setHasFetchedBountyDetails(true);
       }).catch(err => {
         console.log('we fucked with specific bounty: ', err);
       })
     }
-  }
+  }, 2000);
 
-  const getClaimBountyDetails = () => {
+  const getClaimBountyDetails = _.throttle(() => {
     const data = getOwnerAndRepoForPRPage();
     if(data) {
       console.log('owner: ', data.owner);
@@ -250,13 +242,13 @@ const App = () => {
         console.log('we fucked with bounties to claim: ', err);
       })
     }
-  }
+  }, 2000);
 
-  const getCurrentPRDetails = () => {
+  const getCurrentPRDetails = _.throttle(() => {
     const currentUrl = window.location.href;
     const prPageRegex = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)$/;
     const match = currentUrl.match(prPageRegex);
-    if(match) {
+    if(match && !hasFetchedPRDetails) {
       console.log('pr link: ', currentUrl);
       
       browser.runtime.sendMessage({
@@ -267,40 +259,45 @@ const App = () => {
         if(response.data?.data) {
           getClaimBountyDetails();
         }
+        setHasFetchedPRDetails(true);
       }).catch(err => {
         console.log('error from pr detail: ', err);
       })
+    }
+  }, 2000);
+
+  const handleMutation = () => {
+    if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/?$/)) {
+      getAllBountiesByOwnerRepo();
+    } else if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/(\d+)$/)) {
+      getBountyDetailByIssue();
+    } else if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)$/)) {
+      getCurrentPRDetails();
     }
   }
 
   // TODO: optimise api call and element injection
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      // if(isAuthenticated) {
-      //   addBountyButton();
-      //   addBountyLabelonIssues();
-      //   addBountyLabelonIssuePage();
-      //   addClaimBountyOnPR();
-      // }
-      // fetches all the bounties for a repo and injects the label in issues tab
-      getAllBountiesByOwnerRepo();
-
-      // fetches the bounty detail based on specific issue and injects the label
-      getBountyDetailByIssue();
-
-      // fetches the pr details
-      getCurrentPRDetails();
-    });
-    
+    const observer = new MutationObserver(handleMutation);
     const targetNode = document.body;
     const config = { childList: true, subtree: true };
     observer.observe(targetNode, config);
-    
-    // getAllBountiesByOwnerRepo();
     checkAuthStatus();
 
     return () => observer.disconnect();
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const handleUrlChange = () => {
+      setHasFetchedPRDetails(false);
+    }
+
+    window.addEventListener('popstate', handleUrlChange);
+
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+    }
+  }, []);
 
   return null;
 };
