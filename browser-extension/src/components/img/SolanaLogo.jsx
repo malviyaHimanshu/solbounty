@@ -2,6 +2,7 @@ import React from 'react';
 
 export default function SolanaLogo({
   height = "88",
+  color = "#ffffff"
 }) {
   return (
     <svg height={height} style={{ width: 'auto' }} viewBox="0 0 101 88" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -14,12 +15,12 @@ export default function SolanaLogo({
           <stop offset="0.6" stop-color="#43B4CA" />
           <stop offset="0.72" stop-color="#28E0B9" />
           <stop offset="0.97" stop-color="#19FB9B" /> */}
-          <stop offset="0.08" stop-color="#ffffff" />
-          <stop offset="0.3" stop-color="#ffffff" />
-          <stop offset="0.5" stop-color="#ffffff" />
-          <stop offset="0.6" stop-color="#ffffff" />
-          <stop offset="0.72" stop-color="#ffffff" />
-          <stop offset="0.97" stop-color="#ffffff" />
+          <stop offset="0.08" stop-color={color} />
+          <stop offset="0.3" stop-color={color} />
+          <stop offset="0.5" stop-color={color} />
+          <stop offset="0.6" stop-color={color} />
+          <stop offset="0.72" stop-color={color} />
+          <stop offset="0.97" stop-color={color} />
         </linearGradient>
       </defs>
     </svg>
