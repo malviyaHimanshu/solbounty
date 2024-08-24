@@ -209,25 +209,33 @@ router.post('/detail/pr_url', authMiddleware, async (req, res) => {
         'Accept': 'application/vnd.github.v3+json'
       }
     });
-    console.log("prResponse: ", prResponse.data.user.login);
+    console.log("prResponse: ", prResponse.data);
 
     const user = await prisma.user.findUnique({
       where: {
-        github_username: username
+        github_username: prResponse.data.user.login
       }
     });
 
-    if(!user || user.github_username !== prResponse.data.user.login) {
+    if(!user) {
       return res.status(400).json({
         error: 'user is not authorized to claim this bounty'
       });
+    } else if(user && user.github_username !== username) {
+      return res.status(200).json({
+        message: 'user fetched successfully',
+        data: user,
+        isAuthorized: false   // user can not attempt an issue
+      })
     }
 
-    return res.status(200).json({
-      message: 'user fetched successfully',
-      data: user
-    });
-
+    if(user && user.github_username === username) {
+      return res.status(200).json({
+        message: 'user fetched successfully',
+        data: user,
+        isAuthorized: true   // user can attempt an issue
+      });
+    }
   } catch (error) {
     console.error("error fetching bounty: ", error);
     return res.status(500).json({
@@ -332,6 +340,7 @@ router.get('/won_by/:userId', authMiddleware, async (req, res) => {
 
 // TODO: create an attempt for a bounty
 // TODO: add auth middleware
+// TODO: add pr detail or pr link to the attempt as well
 router.post('/attempt', authMiddleware, async (req, res) => {
   const { bountyId, signature } = req.body;
   const userId = req.body.user.userId;

@@ -39,6 +39,7 @@ export default function LoginPage() {
     });
   }
 
+  // TODO: connect wallet and take the public key from the user
   const handleLogin = () => {
     axios.post(`${API_URL}/v1/auth/register`, {
       pubKey: 'pubKey',
