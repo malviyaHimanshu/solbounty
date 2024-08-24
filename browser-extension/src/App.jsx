@@ -19,7 +19,7 @@ export const useDarkMode = () => {
   return isDarkMode;
 };
 
-function addBountyButton() {
+function addBountyButton(userDetails) {
   const mergeMessageElement = document.querySelector('.merge-message');
   if (mergeMessageElement) {
     const mergeButton = mergeMessageElement.querySelector(':scope > div');
@@ -35,7 +35,7 @@ function addBountyButton() {
       mergeButton.insertBefore(bountyButtonContainer, mergeButton.firstChild);
 
       ReactDOM.render(
-        <BountyButton title={'Approve'} />,
+        <BountyButton title={'Bounty'} userDetails={userDetails} />,
         bountyButtonContainer
       )
     }
@@ -256,8 +256,19 @@ const App = () => {
         prUrl: currentUrl
       }).then(response => {
         console.log('response from pr detail: ', response);
+
         if(response.data?.data) {
-          getClaimBountyDetails();
+          // TODO: move this in else if block
+          addBountyButton(response.data.data);
+          if(response.data?.isAuthorized) {
+            // user himself looking at his own pr so can attempt an issue
+            console.log('adding attemp for issue');
+            getClaimBountyDetails();
+          } else if(!response.data?.isAuthorized) {
+            // maintainer looking at some users pr so can give bounty
+            // addBountyButton(response.data.data);
+            console.log('added bounty button');
+          }
         }
         setHasFetchedPRDetails(true);
       }).catch(err => {
@@ -302,4 +313,10 @@ const App = () => {
   return null;
 };
 
-export default App;
+const WalletApp = () => {
+  return (
+    <App />
+  )
+}
+
+export default WalletApp;
