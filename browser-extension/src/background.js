@@ -1,6 +1,9 @@
 
 import browser from 'webextension-polyfill';
 import axios from 'axios';
+import { Connection, PublicKey } from '@solana/web3.js';
+
+const connection = new Connection("https://api.devnet.solana.com");
 
 // Example: Listen for messages
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -119,4 +122,57 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 
   // TODO: add approve bounty for the pr raised
+
+
+  // get recent blockhash
+  if(message.type === 'GET_RECENT_BLOCKHASH') {
+    connection.getLatestBlockhash().then(blockhash => {
+      console.log('we here at blockhash', blockhash);
+      sendResponse({
+        data: blockhash
+      });
+    }).catch(err => {
+      console.log('err', err);
+      sendResponse({
+        data: null
+      });
+    });
+
+    return true;
+  }
+
+  // send raw transaction
+  if(message.type === 'SEND_RAW_TRANSACTION') {
+    let { serialisedTransaction } = message;
+    if (typeof serialisedTransaction === 'object' && !(serialisedTransaction instanceof Uint8Array)) {
+      serialisedTransaction = new Uint8Array(Object.values(serialisedTransaction));
+    }
+    console.log('we here for serialised transaction', serialisedTransaction);
+    connection.sendRawTransaction(serialisedTransaction).then(signature => {
+      console.log('we here at signature', signature);
+
+      connection.confirmTransaction(signature, {
+        commitment: 'confirmed'
+      }).then(() => {
+        console.log('Transaction confirmed', signature);
+        sendResponse({
+          data: signature
+        });
+      }).catch(err => {
+        console.log('Transaction not confirmed', err);
+        sendResponse({
+          data: null,
+          error: err.message
+        });
+      });
+    }).catch(err => {
+      console.log('err', err);
+      sendResponse({
+        data: null,
+        error: err.message
+      });
+    });
+
+    return true;
+  }
 });

@@ -7,4 +7,12 @@ const rootElement = document.createElement('div');
 rootElement.id = 'react-root';
 document.body.appendChild(rootElement);
 
+const script = document.createElement('script');
+script.src = chrome.runtime.getURL('pageScript.js');
+script.onload = function() {
+  this.remove();
+};
+console.log('script is this : ', script);
+(document.head || document.documentElement).appendChild(script);
+
 ReactDOM.render(<WalletApp />, rootElement);
