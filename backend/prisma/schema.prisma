@@ -28,6 +28,9 @@ model User {
   bonties_created       Bounty[]  @relation("CreatedByUser")
   bounties_attempted    Attempt[]
 
+  transactions_sent     Transaction[] @relation("sendByUser")
+  transactions_received Transaction[] @relation("receivedByUser")
+
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
 }
@@ -68,6 +71,25 @@ model Attempt {
   status                AttemptStatus
 
   signature             String
+
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+}
+
+model Transaction {
+  id                    Int       @id @default(autoincrement())
+
+  from                  User      @relation("sendByUser", fields: [from_id], references: [id])
+  from_id               Int
+
+  to                    User      @relation("receivedByUser", fields: [to_id], references: [id])
+  to_id                 Int
+
+  amount                String
+  token                 String
+
+  signature             String    @unique
+  pr_url                String
 
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt

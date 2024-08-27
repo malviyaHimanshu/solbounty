@@ -139,7 +139,7 @@ router.get('/detail/:bountyId', authMiddleware, async (req, res) => {
 
 // TODO: add auth middleware
 // get a bounty detail by issue url
-router.post('/detail/issue_url', async (req, res) => {
+router.post('/detail/issue_url', authMiddleware, async (req, res) => {
   const issueUrl = req.body.issueUrl;
   if (!issueUrl) {
     return res.status(400).json({
@@ -209,7 +209,7 @@ router.post('/detail/pr_url', authMiddleware, async (req, res) => {
         'Accept': 'application/vnd.github.v3+json'
       }
     });
-    console.log("prResponse: ", prResponse.data);
+    // console.log("prResponse: ", prResponse.data);
 
     const user = await prisma.user.findUnique({
       where: {
@@ -246,7 +246,7 @@ router.post('/detail/pr_url', authMiddleware, async (req, res) => {
 
 // TODO: add auth middleware
 // get all bounties by owner and repo
-router.post('/by_owner_repo', async (req, res) => {
+router.post('/by_owner_repo', authMiddleware, async (req, res) => {
   const { owner, repo } = req.body;
   if (!owner || !repo) {
     return res.status(400).json({

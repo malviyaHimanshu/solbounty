@@ -4,6 +4,7 @@ import { EXPRESS_SESSION_SECRET, FRONTEND_URL, PORT } from './config/environment
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import bountyRoutes from './routes/bounty.routes';
+import transactionRoutes from './routes/transaction.routes';
 import passport from 'passport';
 import session from 'express-session';
 import cors from 'cors';
@@ -39,6 +40,7 @@ app.use(passport.session());
 app.use('/v1/auth', authRoutes);
 app.use('/v1/user', userRoutes); 
 app.use('/v1/bounty', bountyRoutes);
+app.use('/v1/transaction', transactionRoutes);
 
 app.listen(PORT, () => {
   console.log(`[${PORT}] we listening...`);
