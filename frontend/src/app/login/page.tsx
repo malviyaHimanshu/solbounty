@@ -11,9 +11,13 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { API_URL } from "@/lib/constants";
 import { useRouter } from "next/navigation";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { publicKey, connected } = useWallet();
+  const [pubKey, setPubKey] = useState<string | null>(null);
+  
   // TODO: update the github to get the gitgub username as well
   const [profile, setProfile] = useState<any>(null);
   const [status, setStatus] = useState<'authenticated' | 'unauthenticated'>('unauthenticated')
@@ -25,6 +29,13 @@ export default function LoginPage() {
   useEffect(() => {
     getProfileData();
   }, []);
+
+  useEffect(() => {
+    if(connected && publicKey) {
+      setPubKey(publicKey.toBase58());
+      console.log("public key: ", publicKey.toBase58());
+    }
+  }, [connected, publicKey]);
 
   const getProfileData = async () => {
     await axios.get(`${API_URL}/v1/user/profile`, {
@@ -41,8 +52,13 @@ export default function LoginPage() {
 
   // TODO: connect wallet and take the public key from the user
   const handleLogin = () => {
+    if(!connected || !publicKey) {
+      console.error("no wallet connected");
+      return;
+    }
+
     axios.post(`${API_URL}/v1/auth/register`, {
-      pubKey: 'pubKey',
+      pubKey: pubKey,
     }, {
       withCredentials: true,
     }).then((res) => {
