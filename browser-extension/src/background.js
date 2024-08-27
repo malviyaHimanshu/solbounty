@@ -143,23 +143,33 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   // send raw transaction
   if(message.type === 'SEND_RAW_TRANSACTION') {
-    let { serialisedTransaction } = message;
+    let { serialisedTransaction, transactionDetails } = message;
     if (typeof serialisedTransaction === 'object' && !(serialisedTransaction instanceof Uint8Array)) {
       serialisedTransaction = new Uint8Array(Object.values(serialisedTransaction));
     }
-    console.log('we here for serialised transaction', serialisedTransaction);
+    
     connection.sendRawTransaction(serialisedTransaction).then(signature => {
       console.log('we here at signature', signature);
+      if (!signature || typeof signature !== 'string') {
+        throw new Error('Invalid transaction signature');
+      }
 
-      connection.confirmTransaction(signature, {
-        commitment: 'confirmed'
-      }).then(() => {
-        console.log('Transaction confirmed', signature);
+      axios.post('http://localhost:8080/v1/transaction', {
+        payer: transactionDetails.payer,
+        recipient: transactionDetails.recipient,
+        amount: transactionDetails.amount,
+        tokenType: transactionDetails.tokenType,
+        pr_url: transactionDetails.pr_url,
+        signature: signature
+      }, {
+        withCredentials: true
+      }).then(response => {
+        console.log('transaction register to the server', response.data);
         sendResponse({
           data: signature
         });
       }).catch(err => {
-        console.log('Transaction not confirmed', err);
+        console.log('error while registering transaction', err);
         sendResponse({
           data: null,
           error: err.message

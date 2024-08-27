@@ -6,19 +6,19 @@ import browser from "webextension-polyfill";
 // TODO: add loading while waiting for transaction to complete
 export default function BountyButton({
   title,
-  userDetails
+  userDetails,
+  prUrl
 }) {
+  const isDarkMode = useDarkMode();
   const [user, setUser] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const isDarkMode = useDarkMode();
   const [tokenAmount, setTokenAmount] = useState(0);
   const [tokenType, setTokenType] = useState("SOL");
-  const [hasError, setHasError] = useState(false);
   const [signature, setSignature] = useState(null);
   const [transactionError, setTransactionError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log('we are speaking from bounty button the user is', userDetails);
     setUser(userDetails);
     
     const handleMessage = (event) => {
@@ -35,6 +35,7 @@ export default function BountyButton({
           }, "*"); // TODO: update target origin to be restrictive
         }).catch(error => {
           console.log('failed to get latest blockhash: ', error);
+          setTransactionError(error.message);
           window.postMessage({
             type: "SOLANA_BLOCKHASH_RESPONSE",
             error: error.message
@@ -45,9 +46,18 @@ export default function BountyButton({
 
         browser.runtime.sendMessage({
           type: "SEND_RAW_TRANSACTION",
-          serialisedTransaction: event.data.serialisedTransaction
+          serialisedTransaction: event.data.serialisedTransaction,
+          transactionDetails: {
+            payer: event.data.payer,
+            recipient: event.data.recipient,
+            amount: event.data.amount,
+            tokenType: event.data.tokenType,
+            pr_url: prUrl.toString()
+          }
         }).then(response => {
-          console.log("so we screwed over here", response.error);
+          if(response.error) {
+            throw new Error(response.error);
+          }
           console.log("this is the signature content got", response.data);
           // send signature to pageScript.js
           window.postMessage({
@@ -56,6 +66,7 @@ export default function BountyButton({
           }, "*");
         }).catch(error => {
           console.log('failed to send raw transaction: ', error);
+          setTransactionError(error.message);
           window.postMessage({
             type: "SOLANA_SEND_RAW_TRANSACTION_RESPONSE",
             error: error.message
@@ -64,11 +75,12 @@ export default function BountyButton({
 
       } else if(event.data.type === "SOLANA_SIGN_RESPONSE") {
         if (event.data.error) {
-          console.error("we fucked: ", event.data.error);
+          console.error("we fucked with signature: ", event.data.error);
           setTransactionError(event.data.error);
         } else {
           console.log("here is the signature: ", event.data.signature);
-          setSignature(response.data.signature);
+          setIsLoading(false);
+          setSignature(event.data.signature);
         }
       }
     }
@@ -83,7 +95,7 @@ export default function BountyButton({
 
   const sendBounty = (amount, token, recipient) => {
     // send message to pageScript.js
-    console.log('send it', amount, token, recipient);
+    setIsLoading(true);
     window.postMessage({ 
       type: "SOLANA_SIGN_REQUEST",
       recipient,
@@ -94,7 +106,6 @@ export default function BountyButton({
 
   const handleOnClick = (event) => {
     event.preventDefault();
-    console.log('Bounty button clicked');
     setIsModalOpen(true);
   }
 
@@ -106,15 +117,14 @@ export default function BountyButton({
     const inputValue = e.target.value;
     const regex = /^\d*\.?\d{0,9}$/;
     const totalDigits = inputValue.length;
-    if(tokenAmount === 0) {
-      setHasError(true);
-    } else {
-      setHasError(false);
-    }
 
     if (totalDigits <= 20 && regex.test(inputValue)) {
       setTokenAmount(inputValue);
     }
+  }
+
+  const handleTokenTypeChange = (e) => {
+    setTokenType(e.target.value);
   }
 
   function shortenAddress(address) {
@@ -164,11 +174,13 @@ export default function BountyButton({
 
             <div style={{
               border: '1px solid #30363D',
-              borderWidth: '1px 0',
+              borderWidth: '1px 0 0 0',
               padding: '15px 20px',
               display: 'flex',
               flexDirection: 'column',
               gap: '20px',
+              width: '400px',
+              maxWidth: '400px',
               minWidth: '400px',
             }}>
 
@@ -193,12 +205,13 @@ export default function BountyButton({
                   alignItems: 'center',
                   width: '100%',
                   borderRadius: '8px',
-                  border: `1px solid ${hasError ? '#FF0000' : '#30363D'}`,
+                  border: `1px solid #30363D`,
                   backgroundColor: '#161B22',
                   padding: '5px 16px 5px 0',
                 }}>
                   <input
                     type="number"
+                    disabled={isLoading || (signature && !transactionError) || transactionError}
                     value={tokenAmount || ''}
                     style={{
                       fontSize: '14px',
@@ -214,7 +227,7 @@ export default function BountyButton({
                     onChange={handleTokenAmountChange}
                   />
 
-                  <select style={{
+                  <select onChange={handleTokenTypeChange} style={{
                     backgroundColor: '#161B22',
                     color: '#ffffff',
                     border: 'none',
@@ -227,14 +240,14 @@ export default function BountyButton({
                   </select>
                 </div>
 
+                {/* TODO: get realtime equivalent USD */}
                 {/* <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
                   <p style={{ fontSize: '14px', opacity: '0.5' }}>{'~$0.15'}</p>
                   <p style={{ fontSize: '14px', opacity: '0.5' }}>Available: {'0.1 SOL'}</p>
                 </div> */}
               </div>
               
-              {/* TODO: transaction is working but put some loading so let user know */}
-              {signature && !transactionError && (
+              {(signature && !transactionError) && (
                 <div style={{
                   padding: '10px',
                   border: '1px solid #1F6427',
@@ -243,46 +256,77 @@ export default function BountyButton({
                   color: '#14E022',
                   width: '100%',
                 }}>
-                  <p style={{ fontSize: '14px', margin: '0' }}>✅ Transaction Successful</p>
-                  <p style={{ fontSize: '12px', margin: '0', textWrap: 'wrap' }}>{signature}</p>
-                  <a href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`} style={{ fontSize: '14px', margin: '0', textDecoration: 'underline', fontWeight: '500'}}>view on explorer</a>
+                  <p style={{ fontSize: '14px', margin: '0' }}>✅ Transaction sent!</p>
+                  <p style={{ fontSize: '12px', margin: '0', wordWrap: 'break-word', fontFamily: 'monospace' }}>{signature}</p>
+                  <a target="_blank" href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`} style={{ fontSize: '14px', margin: '0', textDecoration: 'underline', fontWeight: '500'}}>view on explorer</a>
+                </div>
+              )}
+
+              {transactionError && (
+                <div style={{
+                  padding: '10px',
+                  border: '1px solid #991b1b',
+                  borderRadius: '8px',
+                  backgroundColor: '#450a0a',
+                  color: '#f87171',
+                  width: '100%',
+                }}>
+                  <p style={{ fontSize: '14px', margin: '0' }}>❌ Transaction failed, try again!</p>
+                  <p style={{ fontSize: '12px', margin: '0', textWrap: 'wrap' }}>{transactionError}</p>
                 </div>
               )}
 
             </div>
 
             <div style={{
+              marginTop: '10px',
+              border: '1px solid #30363D',
+              borderWidth: '1px 0 0 0',
               padding: '15px 20px',
               width: '100%',
               display: 'flex',
               justifyContent: 'end',
               gap: '5px',
             }}>
-              <button onClick={handleCloseModal} style={{
-                padding: '5px 16px',
-                backgroundColor: '#21262D',
-                border: '1px solid #30363D',
-                borderRadius: '7px',
-                fontSize: '14px',
-              }}>Cancel</button>
-
-              {/* this is pretty messy way, TODO: do it better */}
-              { (tokenAmount > 0 && user?.account_addr) ? (
-                <button onClick={() => sendBounty(tokenAmount, tokenType, user?.account_addr)} className="sol-send-bounty-button" style={{
+              {(signature && !transactionError) ? (
+                <button onClick={handleCloseModal} style={{
                   padding: '5px 16px',
                   backgroundColor: '#238636',
                   border: '1px solid #3E924B',
                   borderRadius: '7px',
                   fontSize: '14px',
-                }}>Send Bounty</button>
+                }}>Done</button>
               ) : (
-                <button style={{
+                <button onClick={handleCloseModal} style={{
                   padding: '5px 16px',
                   backgroundColor: '#21262D',
-                  border: '1px solid #3E924B',
+                  border: '1px solid #30363D',
                   borderRadius: '7px',
                   fontSize: '14px',
-                }}>Send Bounty</button>
+                }}>Cancel</button>
+              )}
+
+              {/* this is pretty messy way, TODO: do it better */}
+              { !(signature && !transactionError) && (
+                (tokenAmount > 0 && user?.account_addr) ? (
+                  <button onClick={() => sendBounty(tokenAmount, tokenType, user?.account_addr)} style={{
+                    padding: '5px 16px',
+                    backgroundColor: '#238636',
+                    border: '1px solid #3E924B',
+                    borderRadius: '7px',
+                    fontSize: '14px',
+                  }}>{ isLoading ? 'Loading...' : 'Send Bounty'}</button>
+                ) : (
+                  <button style={{
+                    padding: '5px 16px',
+                    opacity: '0.5',
+                    cursor: 'not-allowed',
+                    backgroundColor: '#21262D',
+                    border: '1px solid #30363D',
+                    borderRadius: '7px',
+                    fontSize: '14px',
+                  }}>Send Bounty</button>
+                )
               )}
             </div>
           </div>

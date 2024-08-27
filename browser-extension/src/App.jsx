@@ -19,7 +19,7 @@ export const useDarkMode = () => {
   return isDarkMode;
 };
 
-function addBountyButton(userDetails) {
+function addBountyButton(userDetails, pr_url) {
   const mergeMessageElement = document.querySelector('.merge-message');
   if (mergeMessageElement) {
     const mergeButton = mergeMessageElement.querySelector(':scope > div');
@@ -35,7 +35,7 @@ function addBountyButton(userDetails) {
       mergeButton.insertBefore(bountyButtonContainer, mergeButton.firstChild);
 
       ReactDOM.render(
-        <BountyButton title={'Bounty'} userDetails={userDetails} />,
+        <BountyButton title={'Bounty'} userDetails={userDetails} prUrl={pr_url} />,
         bountyButtonContainer
       )
     }
@@ -259,7 +259,7 @@ const App = () => {
 
         if(response.data?.data) {
           // TODO: move this in else if block
-          addBountyButton(response.data.data);
+          addBountyButton(response.data.data, currentUrl);
           if(response.data?.isAuthorized) {
             // user himself looking at his own pr so can attempt an issue
             console.log('adding attemp for issue');

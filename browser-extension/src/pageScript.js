@@ -102,14 +102,14 @@ function getBlockhash() {
 }
 
 // TODO: complete this
-function sendRawTransaction(serialisedTransaction) {
+function sendRawTransaction(serialisedTransaction, payer, recipient, amount, tokenType) {
   return new Promise((resolve, reject) => {
-    window.postMessage({ type: "SOLANA_SEND_RAW_TRANSACTION", serialisedTransaction }, "*");
+    window.postMessage({ type: "SOLANA_SEND_RAW_TRANSACTION", serialisedTransaction, payer, recipient, amount, tokenType }, "*");
 
     const onMessage = (event) => {
       if(event.data.type === "SOLANA_SEND_RAW_TRANSACTION_RESPONSE") {
         if(event.data.error) {
-          console.error('failed to send raw transaction: ', event.data.error);
+          console.error('failed to get raw transaction response: ', event.data.error);
           reject(event.data.error);
         } else {
           console.log(event);
@@ -176,7 +176,7 @@ async function transferToken(
     console.log('serialised transaction: ', serialisedTransaction);
 
     // TODO: handle it the same way as blockhash
-    const signature = await sendRawTransaction(serialisedTransaction);
+    const signature = await sendRawTransaction(serialisedTransaction, payer, recipient, amount, tokenType);
 
     console.log('Transaction successful, signature :', signature);
     return signature;
