@@ -1,6 +1,7 @@
 import Button from "@/components/button";
 import CallToAction from "@/components/call-to-action";
 import SolanaLogo from "@/components/img/SolanaLogo";
+import SolBountyLogo from "@/components/img/SolBountyLogo";
 import LoginButton from "@/components/login-button";
 import { interTight } from "@/lib/fonts";
 import Link from "next/link";
@@ -12,7 +13,8 @@ export default async function LandingPage() {
     <main className="min-h-screen ">
       <header className="flex items-center justify-between p-5 px-14 h-20">
         <h1 className={ interTight.className + " text-xl font-semibold tracking-tight flex items-center gap-2"}>
-          <SolanaLogo height="18" color="#18181B" />
+          {/* <SolBountyLogo /> */}
+          <SolanaLogo color="#18181B" />
           solbounty
         </h1>
         <LoginButton />

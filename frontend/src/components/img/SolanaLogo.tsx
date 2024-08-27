@@ -1,7 +1,7 @@
 "use client";
 
 export default function SolanaLogo({
-  height = "88",
+  height = "18",
   monoChrome = true,
   color = "#ffffff"
 }) {

@@ -50,3 +50,14 @@ export function verifyToken(token: any): any {
 export function fromNow(date: string): string {
   return dayjs(date).fromNow();
 }
+
+export function formateDate(date: string): string {
+  return dayjs(date).format('DD MMMM YYYY, hh:mm A');
+}
+
+export function shortenAddress(address: string): string {
+  if (!address) return "";
+  const start = address.slice(0, 4); // First 4 characters
+  const end = address.slice(-4); // Last 4 characters
+  return `${start}...${end}`;
+}

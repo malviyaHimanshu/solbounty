@@ -20,7 +20,7 @@ export default function Sidebar() {
     { label: 'Home', href: '/dashboard/home', icon: <HomeOutlinedIcon color="#71717a"  />, iconActive: <HomeOutlinedIcon color="#3f3f46" /> },
     { label: 'Create bounty', href: '/dashboard/create-bounty', icon: <PlusOutlinedIcon color="#71717a" />, iconActive: <PlusOutlinedIcon color="#3f3f46" /> },
     { label: 'Solve bounties', href: '/dashboard/solve-bounties', icon: <MedalOutlinedIcon color="#71717a" />, iconActive: <MedalOutlinedIcon color="#3f3f46" /> },
-    { label: 'Earnings', href: '/dashboard/earnings', icon: <CurrencyIcon color="#71717a" />, iconActive: <CurrencyIcon color="#3f3f46" /> },
+    { label: 'Transactions', href: '/dashboard/transactions', icon: <CurrencyIcon color="#71717a" />, iconActive: <CurrencyIcon color="#3f3f46" /> },
     { label: 'Profile', href: '/dashboard/profile', icon: <UserCircleOutlinedIcon color="#71717a" />, iconActive: <UserCircleOutlinedIcon color="#3f3f46" /> },
   ]
 

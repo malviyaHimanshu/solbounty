@@ -29,7 +29,11 @@ export default function Home() {
 
   return (
     <>
-      <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Welcome back, {profile?.name.split(' ')[0]}</h1>
+      <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Welcome back 
+        {profile ? (
+          profile?.name ? `, ${profile.name.split(" ")[0]}` : `, ${profile.login}`
+        ) : ''}
+      </h1>
       <p className="mt-2 text-zinc-500">create new bounties or explore all open bounties.</p>
 
       <div className="grid grid-cols-1 gap-5 mt-10 sm:grid-cols-2 lg:grid-cols-3">

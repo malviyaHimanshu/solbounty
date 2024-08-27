@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "solbounty",
-  description: "bounties made simpler with solana",
+  description: "bounties on GitHub with Solana",
 };
 
 export default function RootLayout({
@@ -16,6 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <link rel="icon" href="/icon.svg" />
       <body className={inter.className}>
         <Providers>
           {children}

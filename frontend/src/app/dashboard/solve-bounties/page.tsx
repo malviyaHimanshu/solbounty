@@ -4,6 +4,8 @@ import SolanaLogo from "@/components/img/SolanaLogo";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Chip } from "@nextui-org/react";
 import { useEffect } from "react";
+import { coromorantGaramond } from "@/lib/fonts";
+import { cn } from "@/lib/utils";
 
 export default function Solve() {
   const { publicKey, connected } = useWallet();
@@ -16,25 +18,18 @@ export default function Solve() {
   }, [connected, publicKey]);
 
   return (
-    <>
-      <div className="flex flex-col gap-5" suppressHydrationWarning>
-        <div className="border border-zinc-200 transition-all 0.2s ease-in-out rounded-[13px]">
-          <div className="flex items-center justify-between transition-all 0.2s ease-in-out border-2 border-white p-7 rounded-xl">
-            <div className="flex items-center gap-5">
-              <SolanaLogo height="33px" />
-              <div>
-                <h1 className="text-xl font-medium text-zinc-800 flex items-center gap-2">
-                  Connect Wallet
-                  { connected && <Chip color="success" variant="flat">connected</Chip>}
-                  { !connected && <Chip color="danger" variant="flat">disconnected</Chip>}
-                </h1>
-                <p className="text-zinc-600 text-sm mt-0.5">Connect your Solana based wallet to receive payouts.</p>
-              </div>
-            </div>
-            <ConnectWallet />
-          </div>
+    <div>
+      {/* <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Solve bounties</h1>
+      <p className="mt-2 text-zinc-500">Explore all bounties and start working on them.</p> */}
+      
+      <div className="flex flex-col gap-5 h-96">
+        <div className="border border-zinc-200 transition-all 0.2s ease-in-out rounded-[13px] h-full grid place-content-center">
+
+          <h1 className={cn("text-4xl font-semibold tracking-tight text-zinc-700", coromorantGaramond.className)}>Coming soon</h1>
+          <p className="text-zinc-500 mt-2">I'm working on this to deliver the best experience for you and will be releasing soon.</p>
+
         </div>
       </div>
-    </>
+    </div>
   )
 }
