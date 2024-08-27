@@ -55,17 +55,9 @@ router.get('/:userId', authMiddleware, async (req, res) => {
       });
     }
 
-    const github_data = await axios.get(`https://api.github.com/users/${user.github_username}`);
-    const user_data = {
-      name: github_data.data.name,
-      avatar_url: github_data.data.avatar_url,
-      url: github_data.data.html_url,
-      ...user,
-    }
-
     return res.status(200).json({
       message: 'user details fetched successfully',
-      data: user_data,
+      data: user,
     });
   } catch (error) {
     console.error("error fetching user details: ", error);

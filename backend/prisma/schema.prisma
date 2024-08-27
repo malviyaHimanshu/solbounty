@@ -19,10 +19,13 @@ enum AttemptStatus {
   CANCELLED
 }
 
+// TODO: store user details such as name, avatar url
 model User {
   id                    Int       @id @default(autoincrement())
   github_username       String    @unique
   account_addr          String    @unique
+  name                  String?
+  avatar_url            String?
 
   bounties_won          Bounty[]  @relation("WonByUser")
   bonties_created       Bounty[]  @relation("CreatedByUser")
@@ -76,6 +79,7 @@ model Attempt {
   updated_at            DateTime  @updatedAt
 }
 
+// TODO: store pr details such as title, number, organisation avatar url 
 model Transaction {
   id                    Int       @id @default(autoincrement())
 
@@ -90,6 +94,9 @@ model Transaction {
 
   signature             String    @unique
   pr_url                String
+  pr_title              String?
+  pr_number             Int?
+  org_avatar_url        String?
 
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt

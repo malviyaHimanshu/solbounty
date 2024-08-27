@@ -6,6 +6,7 @@ import passport, { session } from "passport";
 import { User } from "../config/types";
 import { Strategy as GitHubStrategy } from 'passport-github2';
 import { FRONTEND_URL, GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, JWT_SECRET } from "../config/environment";
+import axios from "axios";
 
 const router = Router();
 
@@ -154,6 +155,12 @@ router.post('/register', async (req, res) => {
   const githubUsername = req.user.username;
 
   try {
+    const github_data = await axios.get(`https://api.github.com/users/${githubUsername}`);
+    const userGitHubInfo = {
+      name: github_data.data.name,
+      avatar_url: github_data.data.avatar_url
+    }
+
     const existingUser = await prisma.user.findFirst({
       where: {
         account_addr: pubKey,
@@ -169,6 +176,8 @@ router.post('/register', async (req, res) => {
         data: {
           account_addr: pubKey,
           github_username: githubUsername,
+          name: userGitHubInfo.name,
+          avatar_url: userGitHubInfo.avatar_url
         }
       });
     }
