@@ -44,16 +44,13 @@ function addBountyButton(userDetails, pr_url) {
 
 function addBountyLabelonIssues(issues) {
   // adding bounty label to the respective issue
-  console.log('issues', issues);
-
-
   if(issues.length === 0) {
     return;
   }
 
   issues.forEach(issue => {
     const issueTitleElement = document.querySelector(`#issue_${issue.issue_number}_link`);
-    console.log('issueTitleElement', issueTitleElement);
+    // console.log('issueTitleElement', issueTitleElement);
     if (issueTitleElement && !document.querySelector(`#bounty-label-${issue.issue_number}`)) {
       const labelContainer = document.createElement('div');
       labelContainer.id = `bounty-label-${issue.issue_number}`;
@@ -76,20 +73,16 @@ function addBountyLabelonIssuePage(issue) {
   const match = window.location.pathname.match(issuePagePattern);
   if (match) {
     const issueId = match[1];
-    console.log('issueId', issueId);
-    console.log('whats good issue', issue);
-    
-
     if(Number(issueId) !== issue.issue_number || !issue) {
       return;
     }
 
-    // TODO: fetch details for the backend api about issue
+    // fetch details for the backend api about issue
     const issuePageMetaSection = document.querySelector('.gh-header-meta');
-    console.log('issuePageMetaSection', issuePageMetaSection);
+    // console.log('issuePageMetaSection', issuePageMetaSection);
     if (issuePageMetaSection) {
       const issueStatusElement = issuePageMetaSection.firstElementChild;
-      console.log('issueStatusElement', issueStatusElement);
+      // console.log('issueStatusElement', issueStatusElement);
 
       if (issueStatusElement && !document.querySelector('#ind-bounty-label')) {
         const labelContainer = document.createElement('span');
@@ -117,7 +110,7 @@ function addClaimBountyOnPR(bounties) {
     // add claim bounty button while raising pr
     const prHeaderActions = document.querySelector('.gh-header-show .gh-header-actions');
     if (prHeaderActions) {
-      console.log('prHeaderActions', prHeaderActions);
+      // console.log('prHeaderActions', prHeaderActions);
       if (!document.querySelector('#claim-bounty-button')) {
         const claimBountyButtonContainer = document.createElement('div');
         claimBountyButtonContainer.id = 'claim-bounty-button';
@@ -174,30 +167,27 @@ const App = () => {
     browser.runtime.sendMessage({
       type: 'GET_AUTH_STATUS',
     }).then(response => {
-      console.log('we ball ', response);
+      // console.log('we ball ', response);
       setIsAuthenticated(response.data.isAuthenticated);
     }).catch(err => {
-      console.log('we fucked here ', err);
+      // console.log(' ', err);
     });
   }
 
   const getAllBountiesByOwnerRepo = _.throttle(() => {
     const data = getOwnerAndRepoForIssueTab();
     if(data && !hasFetchedBounties) {
-      console.log('owner: ', data.owner);
-      console.log('repo: ', data.repo);
-
       browser.runtime.sendMessage({
         type: 'GET_BOUNTIES_BY_REPO',
         owner: data.owner,
         repo: data.repo
       }).then(response => {
-        console.log('we ball the bounties: ', response);
-        // setBounties(response.data.data);
+        // console.log('bounties: ', response);
+        // setBounties(response.data.data)
         addBountyLabelonIssues(response.data.data);
         setHasFetchedBounties(true);
       }).catch(err => {
-        console.log('we fucked with bounties: ', err);
+        // console.log('error getting bounties: ', err);
       })
     }
   }, 2000); // throttle using lodash to run at most once every 2s
@@ -207,17 +197,15 @@ const App = () => {
     const issuePageRegex = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/(\d+)$/;
     const match = currentUrl.match(issuePageRegex);
     if(match && !hasFetchedBountyDetails) {
-      console.log('issueUrl: ', currentUrl)
-      
       browser.runtime.sendMessage({
         type: 'GET_BOUNTY_DETAIL',
         issueUrl: currentUrl
       }).then(response => {
-        console.log('we ball with specific bounty: ', response);
+        // console.log('specific bounty: ', response);
         addBountyLabelonIssuePage(response.data.data);
         setHasFetchedBountyDetails(true);
       }).catch(err => {
-        console.log('we fucked with specific bounty: ', err);
+        // console.log('error in specific bounty: ', err);
       })
     }
   }, 2000);
@@ -225,21 +213,18 @@ const App = () => {
   const getClaimBountyDetails = _.throttle(() => {
     const data = getOwnerAndRepoForPRPage();
     if(data) {
-      console.log('owner: ', data.owner);
-      console.log('repo: ', data.repo);
-
       browser.runtime.sendMessage({
         type: 'GET_BOUNTIES_BY_REPO',
         owner: data.owner,
         repo: data.repo
       }).then(response => {
-        console.log('we ball the bounties to claim: ', response);
+        // console.log('bounties to claim: ', response);
         // setBounties(response.data.data);
         if(response.data.data.length) {
           addClaimBountyOnPR(response.data.data);
         }
       }).catch(err => {
-        console.log('we fucked with bounties to claim: ', err);
+        // console.log('error in bounties to claim: ', err);
       })
     }
   }, 2000);
@@ -249,41 +234,39 @@ const App = () => {
     const prPageRegex = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)$/;
     const match = currentUrl.match(prPageRegex);
     if(match && !hasFetchedPRDetails) {
-      console.log('pr link: ', currentUrl);
       
       browser.runtime.sendMessage({
         type: 'GET_PR_DETAIL',
         prUrl: currentUrl
       }).then(response => {
-        console.log('response from pr detail: ', response);
 
         if(response.data?.data) {
-          // TODO: move this in else if block
-          addBountyButton(response.data.data, currentUrl);
           if(response.data?.isAuthorized) {
             // user himself looking at his own pr so can attempt an issue
-            console.log('adding attemp for issue');
+            // console.log('adding attemp for issue');
             getClaimBountyDetails();
           } else if(!response.data?.isAuthorized) {
             // maintainer looking at some users pr so can give bounty
-            // addBountyButton(response.data.data);
-            console.log('added bounty button');
+            addBountyButton(response.data.data, currentUrl);
+            // console.log('added bounty button');
           }
         }
         setHasFetchedPRDetails(true);
       }).catch(err => {
-        console.log('error from pr detail: ', err);
+        // console.log('error from pr detail: ', err);
       })
     }
   }, 2000);
 
   const handleMutation = () => {
-    if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/?$/)) {
-      getAllBountiesByOwnerRepo();
-    } else if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/(\d+)$/)) {
-      getBountyDetailByIssue();
-    } else if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)$/)) {
-      getCurrentPRDetails();
+    if(isAuthenticated) {
+      if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/?$/)) {
+        getAllBountiesByOwnerRepo();
+      } else if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/(\d+)$/)) {
+        getBountyDetailByIssue();
+      } else if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)$/)) {
+        getCurrentPRDetails();
+      }
     }
   }
 

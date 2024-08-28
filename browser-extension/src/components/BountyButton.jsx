@@ -27,14 +27,14 @@ export default function BountyButton({
         browser.runtime.sendMessage({
           type: "GET_RECENT_BLOCKHASH"
         }).then(response => {
-          console.log("this is the blockhash content got", response.data);
+          // console.log("this is the blockhash content got", response.data);
           // send blockhash to pageScript.js
           window.postMessage({
             type: "SOLANA_BLOCKHASH_RESPONSE",
             blockhash: response.data
           }, "*"); // TODO: update target origin to be restrictive
         }).catch(error => {
-          console.log('failed to get latest blockhash: ', error);
+          // console.log('failed to get latest blockhash: ', error);
           setTransactionError(error.message);
           window.postMessage({
             type: "SOLANA_BLOCKHASH_RESPONSE",
@@ -58,14 +58,14 @@ export default function BountyButton({
           if(response.error) {
             throw new Error(response.error);
           }
-          console.log("this is the signature content got", response.data);
+          // console.log("this is the signature content got", response.data);
           // send signature to pageScript.js
           window.postMessage({
             type: "SOLANA_SEND_RAW_TRANSACTION_RESPONSE",
             signature: response.data
           }, "*");
         }).catch(error => {
-          console.log('failed to send raw transaction: ', error);
+          // console.log('failed to send raw transaction: ', error);
           setTransactionError(error.message);
           window.postMessage({
             type: "SOLANA_SEND_RAW_TRANSACTION_RESPONSE",
@@ -75,10 +75,10 @@ export default function BountyButton({
 
       } else if(event.data.type === "SOLANA_SIGN_RESPONSE") {
         if (event.data.error) {
-          console.error("we fucked with signature: ", event.data.error);
+          // console.error("error with signature: ", event.data.error);
           setTransactionError(event.data.error);
         } else {
-          console.log("here is the signature: ", event.data.signature);
+          // console.log("final signature: ", event.data.signature);
           setIsLoading(false);
           setSignature(event.data.signature);
         }

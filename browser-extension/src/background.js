@@ -4,14 +4,13 @@ import axios from 'axios';
 import { Connection, PublicKey } from '@solana/web3.js';
 
 const connection = new Connection("https://api.devnet.solana.com");
+const API_URL = 'http://localhost:8080';
 
-// Example: Listen for messages
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if(message.type === 'GET_AUTH_STATUS') {
-    axios.get('http://localhost:8080/v1/auth/status', {
+    axios.get(`${API_URL}/v1/auth/status`, {
       withCredentials: true
     }).then(response => {
-      console.log('we here at response', response.data);
       sendResponse({
         data: response.data
       });
@@ -26,17 +25,14 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
-  // TODO: add get all bounties relating to the repo
+  // get all bounties relating to the repo
   if(message.type === 'GET_BOUNTIES_BY_REPO') {
-    console.log('message hello hello', message);
-
-    axios.post('http://localhost:8080/v1/bounty/by_owner_repo', {
+    axios.post(`${API_URL}/v1/bounty/by_owner_repo`, {
       owner: message.owner,
       repo: message.repo
     }, {
       withCredentials: true
     }).then(response => {
-      console.log('we here at response', response.data);
       sendResponse({
         data: response.data
       });
@@ -50,16 +46,13 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
-  // TODO: add get bounty details for a specific issue
+  // get bounty details for a specific issue
   if(message.type === 'GET_BOUNTY_DETAIL') {
-    console.log('message hello hello bounty', message);
-
-    axios.post('http://localhost:8080/v1/bounty/detail/issue_url', {
+    axios.post(`${API_URL}/v1/bounty/detail/issue_url`, {
       issueUrl: message.issueUrl
     }, {
       withCredentials: true
     }).then(response => {
-      console.log('we here at response', response.data);
       sendResponse({
         data: response.data
       });
@@ -75,15 +68,13 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   // TODO: add claim bounty from a specific issue
   if(message.type === 'CLAIM_BOUNTY') {
-    console.log('message hello hello claim', message);
-
-    axios.post('http://localhost:8080/v1/bounty/attempt', {
+    axios.post(`${API_URL}/v1/bounty/attempt`, {
       bountyId: message.bountyId,
       signature: message.signature
     }, {
       withCredentials: true
     }).then(response => {
-      console.log('we here at response', response.data);
+      // console.log('we here at response', response.data);
       sendResponse({
         data: response.data
       });
@@ -97,16 +88,13 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true
   }
 
-  // TODO: get pr details for a specific pr
+  // pr details for a specific pr
   if(message.type === 'GET_PR_DETAIL') {
-    console.log('message hello hello pr', message);
-
-    axios.post('http://localhost:8080/v1/bounty/detail/pr_url', {
+    axios.post(`${API_URL}/v1/bounty/detail/pr_url`, {
       prUrl: message.prUrl
     }, {
       withCredentials: true
     }).then(response => {
-      console.log('we here at response', response.data);
       sendResponse({
         data: response.data
       });
@@ -127,7 +115,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // get recent blockhash
   if(message.type === 'GET_RECENT_BLOCKHASH') {
     connection.getLatestBlockhash().then(blockhash => {
-      console.log('we here at blockhash', blockhash);
       sendResponse({
         data: blockhash
       });
@@ -149,12 +136,12 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     
     connection.sendRawTransaction(serialisedTransaction).then(signature => {
-      console.log('we here at signature', signature);
+      console.log('signature', signature);
       if (!signature || typeof signature !== 'string') {
         throw new Error('Invalid transaction signature');
       }
 
-      axios.post('http://localhost:8080/v1/transaction', {
+      axios.post(`${API_URL}/v1/transaction`, {
         payer: transactionDetails.payer,
         recipient: transactionDetails.recipient,
         amount: transactionDetails.amount,
@@ -164,7 +151,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }, {
         withCredentials: true
       }).then(response => {
-        console.log('transaction register to the server', response.data);
         sendResponse({
           data: signature
         });

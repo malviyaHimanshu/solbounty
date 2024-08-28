@@ -14,15 +14,15 @@ window.Buffer = Buffer;
 
 let blockhash = null;
 
-console.log('gm from pageScript.js?');
+console.log('only possible on solana.');
 
 window.addEventListener("message", async (event) => {
   if(event.data.type === "SOLANA_BLOCKHASH_RESPONSE") {
     if(event.data.error) {
-      console.error('failed to get latest blockhash: ', event.data.error);
+      // console.error('failed to get latest blockhash: ', event.data.error);
     } else {
       blockhash = event.data.blockhash;
-      console.log('recieved blockhash in pageScript: ', blockhash);
+      // console.log('recieved blockhash in pageScript: ', blockhash);
     }
   }
 
@@ -34,10 +34,7 @@ window.addEventListener("message", async (event) => {
         throw new Error("Please install Phantom wallet!");
       }
       
-      console.log('we focking made it', provider, event.data);
-      
       const payerPublicKey = await connectWallet();
-      console.log('public key from connectWallet: ', payerPublicKey);
 
       // Transfer token
       const signature = await transferToken(
@@ -51,7 +48,6 @@ window.addEventListener("message", async (event) => {
       window.postMessage({ type: "SOLANA_SIGN_RESPONSE", signature }, "*");
     } catch (error) {
       // Send the error response back to the content script
-      console.log('error: ', error);
       window.postMessage({ type: "SOLANA_SIGN_RESPONSE", error: error.message }, "*");
     }
   }
@@ -65,7 +61,6 @@ async function connectWallet() {
     if(provider.isPhantom) {
       try {
         const response = await provider.connect();
-        console.log('connected to wallet with public key: ', response.publicKey.toString());
         return response.publicKey.toString();
       } catch (error) {
         console.error('failed to connect wallet: ', error);
@@ -90,7 +85,7 @@ function getBlockhash() {
           reject(event.data.error);
         } else {
           blockhash = event.data.blockhash;
-          console.log('recieved blockhash in pageScript: ', blockhash);
+          // console.log('recieved blockhash in pageScript: ', blockhash);
           resolve(blockhash);
         }
         window.removeEventListener("message", onMessage);
@@ -101,7 +96,7 @@ function getBlockhash() {
   });
 }
 
-// TODO: complete this
+
 function sendRawTransaction(serialisedTransaction, payer, recipient, amount, tokenType) {
   return new Promise((resolve, reject) => {
     window.postMessage({ type: "SOLANA_SEND_RAW_TRANSACTION", serialisedTransaction, payer, recipient, amount, tokenType }, "*");
@@ -112,8 +107,7 @@ function sendRawTransaction(serialisedTransaction, payer, recipient, amount, tok
           console.error('failed to get raw transaction response: ', event.data.error);
           reject(event.data.error);
         } else {
-          console.log(event);
-          console.log('Transaction successful, signature: ', event.data.signature);
+          // console.log('Transaction successful, signature: ', event.data.signature);
           const signature = event.data.signature;
           resolve(signature);
         }
@@ -149,33 +143,20 @@ async function transferToken(
     throw new Error("Token type not supported");
   }
 
-  
-  // get latest blockhash
-
-  const blockhash = await getBlockhash();
-  console.log("finally blockhash: ", blockhash);
-  
-  // // check blockhash type
-  // if (typeof blockhash !== 'string') {
-  //   throw new Error("Invalid blockhash: " + blockhash);
-  // }
-  
   // set the recent blockhash and fee payer
+  const blockhash = await getBlockhash();
   transaction.recentBlockhash = blockhash.blockhash;
   transaction.feePayer = payerPublicKey;
 
   // Sign and send the transaction
   try {
-    console.log('Transaction before signing: ', transaction);
-
     const provider = window.solana;
     const signedTransaction = await provider.signTransaction(transaction);
-    console.log('signed transaction: ', signedTransaction);
+    // console.log('signed transaction: ', signedTransaction);
     
     const serialisedTransaction = signedTransaction.serialize();
-    console.log('serialised transaction: ', serialisedTransaction);
+    // console.log('serialised transaction: ', serialisedTransaction);
 
-    // TODO: handle it the same way as blockhash
     const signature = await sendRawTransaction(serialisedTransaction, payer, recipient, amount, tokenType);
 
     console.log('Transaction successful, signature :', signature);

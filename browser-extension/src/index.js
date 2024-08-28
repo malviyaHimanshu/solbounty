@@ -12,7 +12,6 @@ script.src = chrome.runtime.getURL('pageScript.js');
 script.onload = function() {
   this.remove();
 };
-console.log('script is this : ', script);
 (document.head || document.documentElement).appendChild(script);
 
 ReactDOM.render(<WalletApp />, rootElement);

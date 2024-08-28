@@ -18,7 +18,7 @@ const ClaimBountyButton = ({
 
   const handleButtonClick = (event) => {
     event.preventDefault();
-    console.log(`${selectedOption.id} clicked`);
+    // console.log(`${selectedOption.id} clicked`);
 
     // TODO: send claim request to API
     browser.runtime.sendMessage({
