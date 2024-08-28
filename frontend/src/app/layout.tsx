@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <link rel="icon" href="/icon.svg" />
+      <link rel="icon" href="/logo2.svg" />
       <body className={inter.className}>
         <Providers>
           {children}
