@@ -26,6 +26,7 @@ router.get('/', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, async (req, res) => {
   const { issue_url, amount, token } = req.body;
   const userId = req.body.user.userId;
+  const accessToken = req.user?.accessToken;
   if (!issue_url || !amount || !token) {
     return res.status(400).json({
       error: 'issue_url, amount and token are required'
@@ -42,12 +43,16 @@ router.post('/', authMiddleware, async (req, res) => {
   const issue_owner = issue_url.split('/')[3];
   const issue_repo = issue_url.split('/')[4];
   const issue_number = issue_url.split('/')[6];
+  const apiUrl = `https://api.github.com/repos/${issue_owner}/${issue_repo}/issues/${issue_number}`
 
   try {
     // get issue details from github api
-    const issueResponse = await axios.get(
-      `https://api.github.com/repos/${issue_owner}/${issue_repo}/issues/${issue_number}`
-    );
+    const issueResponse = await axios.get(apiUrl, {
+      headers: {
+        'Authorization': `token ${accessToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
 
     const bounty = await prisma.bounty.create({
       data: {
