@@ -15,6 +15,7 @@
   "dependencies": {
     "@octokit/rest": "^21.0.1",
     "@prisma/client": "^5.18.0",
+    "@solana/web3.js": "^1.95.3",
     "@types/express": "^4.17.21",
     "axios": "^1.7.3",
     "cookie-parser": "^1.4.6",
@@ -25,7 +26,8 @@
     "jsonwebtoken": "^9.0.2",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
-    "prisma": "^5.18.0"
+    "prisma": "^5.18.0",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",

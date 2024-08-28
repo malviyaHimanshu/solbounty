@@ -7,6 +7,8 @@ import { User } from "../config/types";
 import { Strategy as GitHubStrategy } from 'passport-github2';
 import { FRONTEND_URL, GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, JWT_SECRET } from "../config/environment";
 import axios from "axios";
+import { PublicKey } from "@solana/web3.js";
+import nacl from "tweetnacl";
 
 const router = Router();
 
@@ -139,10 +141,10 @@ router.get('/status', (req: Request, res: Response) => {
 })
 
 router.post('/register', async (req, res) => {
-  const { pubKey } = req.body;
-  if(!pubKey) {
+  const { pubKey, signature, message } = req.body;
+  if(!pubKey || !signature || !message) {
     return res.status(400).json({
-      error: 'pubKey is required'
+      error: 'pubKey, signature and message are required'
     });
   }
 
@@ -155,6 +157,22 @@ router.post('/register', async (req, res) => {
   const githubUsername = req.user.username;
 
   try {
+    const publicKeyObj = new PublicKey(pubKey);
+    const signatureBuffer = Buffer.from(signature, 'base64');
+    const messageBuffer = Buffer.from(message, 'utf8');
+
+    const isValidSignature = nacl.sign.detached.verify(
+      messageBuffer,
+      signatureBuffer,
+      publicKeyObj.toBytes()
+    );
+
+    if(!isValidSignature) {
+      return res.status(400).json({
+        error: 'could not verify signature!'
+      });
+    }
+
     const github_data = await axios.get(`https://api.github.com/users/${githubUsername}`);
     const userGitHubInfo = {
       name: github_data.data.name,
