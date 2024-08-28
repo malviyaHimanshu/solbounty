@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { coromorantGaramond, instrumentSerif, ptSerif } from "@/lib/fonts";
+import { coromorantGaramond } from "@/lib/fonts";
 import { MedalOutlinedIcon, PlusOutlinedIcon } from "@/icons";
 import Link from "next/link";
 import { useEffect, useState } from "react";

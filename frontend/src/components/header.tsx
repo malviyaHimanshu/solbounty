@@ -41,7 +41,9 @@ export default function Header() {
 
         <div className="p-5 px-10 flex items-center justify-between w-[calc(100vw-250px)] lg:w-[calc(100vw-350px)]">
           <DynamicBreadcrumbs />
-          <Avatar name={`${profile?.name}`} src={`${profile?.avatar_url}`} size="sm" />
+          <Link href={'/dashboard/profile'}>
+            <Avatar className="cursor-pointer hover:outline-2 hover:outline-zinc-300 transition-all duration-200 ease-in-out" name={`${profile?.name}`} src={`${profile?.avatar_url}`} size="sm" />
+          </Link>
         </div>
       </div>
     </header>
