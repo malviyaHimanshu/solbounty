@@ -36,7 +36,7 @@ export default function Earnings() {
     try {
       const response = await transactions;
       setTransactions(response.data.data);
-      console.log("transactions are here: ", response.data.data);
+      // console.log("transactions are here: ", response.data.data);
     } catch {
       console.error('error fetching transactions');
       setTransactions([]);

@@ -30,12 +30,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({children}) => {
       const response = await axios.get(`${API_URL}/v1/auth/status`, {
         withCredentials: true,
       });
-      console.log("response from auth status: ", response.data);
+      // console.log("response from auth status: ", response.data);
       
       if(response.data.isAuthenticated) {
         setIsLoggedIn(true);
         setUser(response.data.userId);
-        console.log("userId from auth provider: ", response.data.userId);
+        // console.log("userId from auth provider: ", response.data.userId);
       }
     } catch(error) {
       setIsLoggedIn(false);

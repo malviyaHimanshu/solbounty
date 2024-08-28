@@ -12,17 +12,20 @@ import { useEffect, useState } from "react";
 import { API_URL } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
+import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { publicKey, connected } = useWallet();
-  const [pubKey, setPubKey] = useState<string | null>(null);
-  
-  // TODO: update the github to get the gitgub username as well
+  const { publicKey, signMessage, connected } = useWallet();
+  const [pubKey, setPubKey] = useState<string>();
+  const [signature, setSignature] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [status, setStatus] = useState<'authenticated' | 'unauthenticated'>('unauthenticated')
+  const [status, setStatus] = useState<'authenticated' | 'unauthenticated'>('unauthenticated');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleClick = () => {
+    setIsLoading(true);
     window.location.href = `${API_URL}/v1/auth/github`;
   }
 
@@ -50,22 +53,63 @@ export default function LoginPage() {
     });
   }
 
-  // TODO: connect wallet and take the public key from the user
-  const handleLogin = () => {
-    if(!connected || !publicKey) {
+  const handleSignTransaction = async () => {
+    if(!publicKey || !signMessage) {
       console.error("no wallet connected");
       return;
     }
 
+    const message = `${window.location.origin} wants you to sign and verify your account for ${publicKey.toBase58()}`;
+    const encodedMessage = new TextEncoder().encode(message);
+
+    try {
+      const signatureBuffer = await signMessage(encodedMessage);
+      const signature = Buffer.from(signatureBuffer).toString('base64');
+      console.log("signature: ", signature);
+      if(!signature) {
+        throw new Error("no signature found");
+      }
+      setSignature(signature);
+      return {
+        signature,
+        message,
+      };
+    } catch (error) {
+      console.error("error signing transaction: ", error);
+      return null;
+    }
+  }
+
+  // login a new user
+  const handleLogin = async () => {
+    setIsLoading(true);
+
+    if(!connected || !publicKey) {
+      toast.error("no wallet connected");
+      return;
+    }
+
+    const response = await handleSignTransaction();
+    if(!response) {
+      toast.error("error signing transaction");
+      return;
+    }
+
+    const { signature, message } = response;
+
     axios.post(`${API_URL}/v1/auth/register`, {
-      pubKey: pubKey,
+      pubKey,
+      signature,
+      message,
     }, {
       withCredentials: true,
     }).then((res) => {
       console.log("register data: ", res.data);
+      toast.success("logged in successfully!");
       router.push('/dashboard');
     }).catch((err) => {
       console.log(err);
+      toast.error("error logging in");
     });
   }
 
@@ -90,9 +134,11 @@ export default function LoginPage() {
           { status === 'unauthenticated' && (
             <div>
               <p className="text-zinc-500 mt-1">login to your account to continue.</p>
-              <Button onClick={handleClick} color="black" className="flex items-center justify-center gap-2 my-5 mb-20">
+              <Button onClick={handleClick} color="black" className={cn("flex items-center justify-center gap-2 my-5 mb-20",
+                isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
+              )}>
                 <GitHubLogoIcon />
-                Sign in with GitHub
+                { isLoading ? 'Loading...' : 'Sign in with GitHub'}
               </Button>
             </div>
           )}
@@ -111,13 +157,15 @@ export default function LoginPage() {
               
               <hr className="w-full border-t border-zinc-300" />
               <div>
-                <p className="text-zinc-500 mb-4">connect wallet to continue.</p>
+                { !publicKey && <p className="text-zinc-500 mb-4">connect wallet to continue.</p>}
                 <ConnectWallet />
               </div>
               
-              <Button onClick={handleLogin} color="black" className="flex items-center justify-center gap-2 my-5">
+              <Button onClick={handleLogin} color="black" className={cn("flex items-center justify-center gap-2 my-5",
+                isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
+              )}>
                 <LoginIcon color="#fff" />
-                Login
+                { isLoading ? 'Loading...' : 'Sign in'}
               </Button>
             </div>
           )}

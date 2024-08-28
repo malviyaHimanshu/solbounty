@@ -20,7 +20,7 @@ export default function Home() {
       withCredentials: true,
     }).then((res) => {
       const userData = res.data.data;
-      console.log(userData);
+      // console.log(userData);
       setProfile(userData);
     }).catch((err) => {
       console.log(err);

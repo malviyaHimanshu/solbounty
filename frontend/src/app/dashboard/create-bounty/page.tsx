@@ -72,7 +72,6 @@ export default function CreateBounty() {
       const response = await axios.get(
         `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`
       );
-      console.log(response.data);
       setIssue(response.data);
     } catch (err) {
       setIsIssueUrlValid(false);
@@ -144,17 +143,17 @@ export default function CreateBounty() {
 
     try {
       const issueUrlValidation = githubIssueSchema.parse(issueUrl);
-      console.log(issueUrlValidation);
-
       const tokenAmountValidation = z.string().nonempty().parse(tokenAmount);
-      console.log(tokenAmountValidation);
+      if (!issueUrlValidation || !tokenAmountValidation) {
+        throw new Error('Invalid input');
+      }
 
       // Create bounty
       const response = await createBountyPromise;
-      console.log("bounty created successfully!", response.data);
       setIssueUrl(null);
       setTokenAmount(null);
       setIsSubmitting(false);
+      window.location.reload();
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
@@ -276,11 +275,10 @@ export default function CreateBounty() {
                     </div>
                     <div className="p-4 py-3 text-sm">
                       <ReactMarkdown
-                        children={issue.body}
                         remarkPlugins={[remarkGfm]}
                         rehypePlugins={[rehypeHighlight]}
                         className="prose prose-zinc text-sm"
-                      />
+                      >{issue.body}</ReactMarkdown>
                     </div>
                   </div>
                 </div>
