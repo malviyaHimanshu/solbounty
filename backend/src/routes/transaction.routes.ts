@@ -83,19 +83,38 @@ router.get('/', authMiddleware, async (req, res) => {
 
 // get all transactions present in the system
 router.get('/all', async (req, res) => {
-  console.log('fetching all transactions');
-  
   try {
     const transactions = await prisma.transaction.findMany({
+      take: 10,
+      orderBy: {
+        created_at: 'desc'
+      },
       include: {
         from: true,
         to: true
       }
     });
 
+    const updateResponse = transactions.map((transaction) => {
+      return {
+        id: transaction.id,
+        amount: transaction.amount,
+        token: transaction.token,
+        pr_detail: {
+          title: transaction.pr_title,
+          number: transaction.pr_number,
+          url: transaction.pr_url,
+          avatar: transaction.org_avatar_url
+        },
+        signature: transaction.signature,
+        to: transaction.to,
+        created_at: transaction.created_at,
+      }
+    });
+
     return res.status(200).json({
       message: 'Transactions fetched successfully',
-      data: transactions
+      data: updateResponse
     });
 
   } catch (error) {
