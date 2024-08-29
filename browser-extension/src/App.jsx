@@ -5,6 +5,7 @@ import BountyLabel from './components/BountyLabel';
 import ClaimBountyButton from './components/ClaimBountyButton';
 import browser from 'webextension-polyfill';
 import _ from 'lodash';
+import LoginPopup from './components/LoginPopup';
 
 export const useDarkMode = () => {
   const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -126,6 +127,26 @@ function addClaimBountyOnPR(bounties) {
     }
   }
 }
+
+function addLoginButton() {
+  if(!document.querySelector('#solbounty-login-button')) {
+    const loginContainer = document.createElement('div');
+    loginContainer.id = 'solbounty-login-button';
+    document.body.appendChild(loginContainer);
+    ReactDOM.render(
+      <LoginPopup />,
+      loginContainer
+    );
+  }
+}
+
+function removeLoginButton() {
+  const loginButton = document.querySelector('#solbounty-login-button');
+  if(loginButton) {
+    loginButton.remove();
+  }
+}
+
 
 function getOwnerAndRepoForIssueTab() {
   const currentUrl = window.location.href;
@@ -260,6 +281,7 @@ const App = () => {
 
   const handleMutation = () => {
     if(isAuthenticated) {
+      removeLoginButton();
       if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/?$/)) {
         getAllBountiesByOwnerRepo();
       } else if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/issues\/(\d+)$/)) {
@@ -267,6 +289,8 @@ const App = () => {
       } else if(window.location.href.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)$/)) {
         getCurrentPRDetails();
       }
+    } else {
+      addLoginButton();
     }
   }
 

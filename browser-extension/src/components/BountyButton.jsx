@@ -154,17 +154,18 @@ export default function BountyButton({
           height: '100vh',
           width: '100vw',
           zIndex: '9999',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.3)':'rgba(0, 0, 0, 0.1)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
         }}>
           
           <div className="sol-bounty-modal-content" style={{
-            backgroundColor: '#161B22',
-            border: '1px solid #30363D',
-            color: '#ffffff',
+            backgroundColor: isDarkMode ? '#161B22':'#F6F8FA',
+            border: `1px solid ${isDarkMode ? '#30363D':'#D0D7DE'}`,
+            color: isDarkMode ? '#ffffff':'#1F2329',
             borderRadius: '12px',
+            boxShadow: '0px 10px 100px 0px rgba(0,0,0,0.3)',
           }}>
             <div style={{
               padding: '15px 20px',
@@ -173,8 +174,7 @@ export default function BountyButton({
             </div>
 
             <div style={{
-              border: '1px solid #30363D',
-              borderWidth: '1px 0 0 0',
+              borderTop: `1px solid ${isDarkMode ? '#30363D':'#D0D7DE'}`,
               padding: '15px 20px',
               display: 'flex',
               flexDirection: 'column',
@@ -205,8 +205,8 @@ export default function BountyButton({
                   alignItems: 'center',
                   width: '100%',
                   borderRadius: '8px',
-                  border: `1px solid #30363D`,
-                  backgroundColor: '#161B22',
+                  border: `1px solid ${isDarkMode ? '#30363D':'#D0D7DE'}`,
+                  backgroundColor: isDarkMode?'#161B22':'#F6F8FA',
                   padding: '5px 16px 5px 0',
                 }}>
                   <input
@@ -219,8 +219,8 @@ export default function BountyButton({
                       padding: '3px 12px',
                       border: 'none',
                       outline: 'none',
-                      backgroundColor: '#161B22',
-                      color: '#ffffff',
+                      backgroundColor: isDarkMode?'#161B22':'#F6F8FA',
+                      color: isDarkMode ? '#ffffff':'#1F2329',
                       width: '100%',
                     }}
                     min={0}
@@ -228,8 +228,8 @@ export default function BountyButton({
                   />
 
                   <select onChange={handleTokenTypeChange} style={{
-                    backgroundColor: '#161B22',
-                    color: '#ffffff',
+                    backgroundColor: isDarkMode?'#161B22':'#F6F8FA',
+                    color: isDarkMode ? '#ffffff':'#1F2329',
                     border: 'none',
                     outline: 'none',
                     fontSize: '14px',
@@ -250,10 +250,10 @@ export default function BountyButton({
               {(signature && !transactionError) && (
                 <div style={{
                   padding: '10px',
-                  border: '1px solid #1F6427',
+                  border: `1px solid ${isDarkMode ? '#1F6427':'#4ade80'}`,
                   borderRadius: '8px',
-                  backgroundColor: '#193022',
-                  color: '#14E022',
+                  backgroundColor: isDarkMode ? '#193022':'#bbf7d0',
+                  color: isDarkMode ? '#14E022':'#16a34a',
                   width: '100%',
                 }}>
                   <p style={{ fontSize: '14px', margin: '0' }}>✅ Transaction sent!</p>
@@ -265,10 +265,10 @@ export default function BountyButton({
               {transactionError && (
                 <div style={{
                   padding: '10px',
-                  border: '1px solid #991b1b',
+                  border: `1px solid ${isDarkMode ? '#991b1b' : '#f87171'}`,
                   borderRadius: '8px',
-                  backgroundColor: '#450a0a',
-                  color: '#f87171',
+                  backgroundColor: isDarkMode ? '#450a0a':'#fecaca',
+                  color: isDarkMode ? '#f87171':'#dc2626',
                   width: '100%',
                 }}>
                   <p style={{ fontSize: '14px', margin: '0' }}>❌ Transaction failed, try again!</p>
@@ -280,8 +280,7 @@ export default function BountyButton({
 
             <div style={{
               marginTop: '10px',
-              border: '1px solid #30363D',
-              borderWidth: '1px 0 0 0',
+              borderTop: `1px solid ${isDarkMode ? '#30363D':'#D0D7DE'}`,
               padding: '15px 20px',
               width: '100%',
               display: 'flex',
@@ -295,12 +294,14 @@ export default function BountyButton({
                   border: '1px solid #3E924B',
                   borderRadius: '7px',
                   fontSize: '14px',
+                  color: '#ffffff',
                 }}>Done</button>
               ) : (
                 <button onClick={handleCloseModal} style={{
                   padding: '5px 16px',
-                  backgroundColor: '#21262D',
-                  border: '1px solid #30363D',
+                  backgroundColor: isDarkMode ? '#21262D':'#F6F8FA',
+                  border: `1px solid ${isDarkMode ? '#30363D':'#D0D7DE'}`,
+                  color: isDarkMode ? '#ffffff':'#1F2329',
                   borderRadius: '7px',
                   fontSize: '14px',
                 }}>Cancel</button>
@@ -315,16 +316,18 @@ export default function BountyButton({
                     border: '1px solid #3E924B',
                     borderRadius: '7px',
                     fontSize: '14px',
+                    color: '#ffffff',
                   }}>{ isLoading ? 'Loading...' : 'Send Bounty'}</button>
                 ) : (
                   <button style={{
                     padding: '5px 16px',
-                    opacity: '0.5',
+                    opacity: '0.7',
                     cursor: 'not-allowed',
-                    backgroundColor: '#21262D',
-                    border: '1px solid #30363D',
+                    backgroundColor: isDarkMode ? '#21262D':'#F6F8FA',
+                    border: `1px solid ${isDarkMode ? '#30363D':'#D0D7DE'}`,
                     borderRadius: '7px',
                     fontSize: '14px',
+                    color: isDarkMode ? '#ffffff':'#1F2329',
                   }}>Send Bounty</button>
                 )
               )}
