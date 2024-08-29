@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
+import backgroundImage from '/public/bg.png';
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -115,20 +117,20 @@ export default function LoginPage() {
 
   return (
     <main className={inter.className + " max-h-screen min-h-screen h-screen flex overflow-hidden fixed top-0 left-0 right-0 bottom-0"}>
-      <div className="h-full w-1/2 bg-zinc-100 p-10 hidden sm:flex flex-col items-start justify-between">
+      <div className="h-full w-1/2 relative p-10 hidden sm:flex flex-col items-start justify-between">
+        <div className="absolute -z-10 top-0 right-0 bottom-0 left-0">
+          <Image src={backgroundImage} alt="background" className="h-full object-cover" />
+        </div>
+
         <Link href={'/'}>  
           <h1 className={ interTight.className + " text-2xl text-zinc-700 font-semibold tracking-tight flex items-center gap-2"}>
             <SolanaLogo height="20" color="#3f3f46" />
             solbounty
           </h1>
         </Link>
-
-        <p className="text-sm text-zinc-600 flex items-center gap-1">
-          made with ❤️ by <a href="https://x.com/himanhacks" className="text-zinc-700"><span className="font-mono underline">himanhacks</span></a>
-        </p>
       </div>
 
-      <div className="h-full w-full sm:w-1/2 grid place-content-center p-10">
+      <div className="h-full w-full sm:w-1/2 grid place-content-center p-10 relative">
         <div>
           <h1 className={ instrumentSerif.className + " text-5xl font-semibold text-zinc-700"}>fork it.</h1>
           { status === 'unauthenticated' && (
@@ -170,6 +172,10 @@ export default function LoginPage() {
             </div>
           )}
         </div>
+
+        <p className="text-sm text-zinc-400 flex items-center gap-2 font-mono absolute bottom-10 left-1/2 -translate-x-1/2">
+          made with love by <a href="https://x.com/himanhacks" className="text-zinc-400"><span className="font-mono">@himanhacks</span></a>
+        </p>
       </div>
     </main>
   )

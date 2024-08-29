@@ -124,7 +124,7 @@ export default function Home() {
             </div>
           </div>
         ): (
-          <div className="mt-5 flex flex-col gap-5">
+          <div className="mt-5 pb-10 flex flex-col gap-5">
             {transactions.map((transaction: any, index: number) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
