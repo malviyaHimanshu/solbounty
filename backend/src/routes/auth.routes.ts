@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import passport, { session } from "passport";
 import { User } from "../config/types";
 import { Strategy as GitHubStrategy } from 'passport-github2';
-import { FRONTEND_URL, GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, JWT_SECRET } from "../config/environment";
+import { FRONTEND_URL, GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, JWT_SECRET, NODE_ENV } from "../config/environment";
 import axios from "axios";
 import { PublicKey } from "@solana/web3.js";
 import nacl from "tweetnacl";
@@ -70,10 +70,13 @@ router.get('/github/callback', passport.authenticate('github', { failureRedirect
       // Set token as an HTTP-only cookie
       res.cookie('auth_token', token, {
         httpOnly: true, // Prevents client-side access via JavaScript
-        secure: process.env.NODE_ENV === 'production', // Ensures the cookie is only sent over HTTPS in production
+        secure: NODE_ENV === 'production', // Ensures the cookie is only sent over HTTPS in production
         maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration set to 7 days
         sameSite: 'strict', // CSRF protection
       });
+
+      console.log("value of NODE_ENV", process.env.NODE_ENV);
+      
 
       return res.redirect(`${FRONTEND_URL}/dashboard`);
     } else {
