@@ -132,7 +132,7 @@ export default function LoginPage() {
 
       <div className="h-full w-full sm:w-1/2 grid place-content-center p-10 relative">
         <div>
-          <h1 className={ instrumentSerif.className + " text-5xl font-semibold text-zinc-700"}>fork it.</h1>
+          <h1 className={ instrumentSerif.className + " text-5xl font-normal text-zinc-700"}>fork it.</h1>
           { status === 'unauthenticated' && (
             <div>
               <p className="text-zinc-500 mt-1">login to your account to continue.</p>
