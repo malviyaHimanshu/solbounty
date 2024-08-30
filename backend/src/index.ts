@@ -42,6 +42,10 @@ app.use('/v1/user', userRoutes);
 app.use('/v1/bounty', bountyRoutes);
 app.use('/v1/transaction', transactionRoutes);
 
+app.get('/', (req, res) => {
+  return res.send('only possible on solana');
+})
+
 app.listen(PORT, () => {
   console.log(`[${PORT}] we listening...`);
 })
